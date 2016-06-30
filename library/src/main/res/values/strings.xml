@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Utility</string>
+    <string name="label_ok">OK</string>
+    <string name="label_annulla">Cancel</string>
+    <string name="label_progress_download_task">Downloading...</string>
+    <string name="label_progress_dialog_task">Loading...</string>
+    <string name="send_email_chooser">Send email</string>
+</resources>
