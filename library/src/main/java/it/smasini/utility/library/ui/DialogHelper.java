@@ -1,10 +1,12 @@
-package it.smasini.utility.library;
+package it.smasini.utility.library.ui;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+
+import it.smasini.utility.library.R;
 
 /**
  * Created by Simone Masini on 30/06/2016

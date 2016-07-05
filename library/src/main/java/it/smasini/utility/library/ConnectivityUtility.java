@@ -8,6 +8,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.provider.Settings;
 
 /**
  * Created by Simone Masini on 30/06/2016
@@ -30,6 +31,21 @@ public class ConnectivityUtility {
             isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
         }
         return isPlugged;
+    }
+
+    public static boolean isPositionActive(Context context){
+        String locationProviders = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        if (locationProviders == null || locationProviders.equals("")) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isConnected(Context context){
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null && activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
 }

@@ -1,8 +1,8 @@
 package it.smasini.utility.library;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.os.Build;
 import android.util.DisplayMetrics;
 
 /**
@@ -34,12 +34,7 @@ public class SizeUtility {
         return px / (metrics.densityDpi / 160f);
     }
 
-
-    public static int getColor(int res, Context context){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return context.getColor(res);
-        }else{
-            return context.getResources().getColor(res);
-        }
+    public static boolean isTablet(Context context){
+        return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 }

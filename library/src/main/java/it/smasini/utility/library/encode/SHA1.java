@@ -1,4 +1,4 @@
-package it.smasini.utility.library;
+package it.smasini.utility.library.encode;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;

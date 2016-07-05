@@ -1,4 +1,4 @@
-package it.smasini.utility.library;
+package it.smasini.utility.library.ui;
 
 import android.content.Context;
 import android.graphics.Bitmap;
