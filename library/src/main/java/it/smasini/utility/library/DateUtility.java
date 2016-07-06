@@ -2,6 +2,7 @@ package it.smasini.utility.library;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -46,5 +47,15 @@ public class DateUtility {
     public static String convertDateToQueryString(Date date){
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         return formatter.format(date);
+    }
+
+    public static int differenceDays(Calendar start, Calendar end) {
+        Date startDate = start.getTime();
+        Date endDate = end.getTime();
+        long startTime = startDate.getTime();
+        long endTime = endDate.getTime();
+        long diffTime = endTime - startTime;
+        long diffDays = diffTime / (1000 * 60 * 60 * 24);
+        return (int)diffDays;
     }
 }

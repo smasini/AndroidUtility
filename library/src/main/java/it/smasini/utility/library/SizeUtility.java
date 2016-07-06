@@ -1,7 +1,6 @@
 package it.smasini.utility.library;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 
@@ -34,7 +33,15 @@ public class SizeUtility {
         return px / (metrics.densityDpi / 160f);
     }
 
-    public static boolean isTablet(Context context){
-        return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
+    public static float pixelsToSp(Context context, float px) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
+        return px/scaledDensity;
     }
+
+    public static float spToPixels(Context context, float sp) {
+        float scaledDensity = context.getResources().getDisplayMetrics().scaledDensity;
+        return sp*scaledDensity;
+    }
+
+
 }

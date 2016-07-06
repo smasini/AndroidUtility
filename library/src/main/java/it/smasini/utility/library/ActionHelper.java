@@ -31,4 +31,9 @@ public class ActionHelper {
         activity.startActivity(i);
     }
 
+    public static void navigateAddress(Activity activity, String address, String comune){
+        Intent intent = new Intent(android.content.Intent.ACTION_VIEW, Uri.parse(String.format("http://maps.google.com/maps?daddr=%s", String.format("%s %s", address, comune))));
+        activity.startActivity(intent);
+    }
+
 }
