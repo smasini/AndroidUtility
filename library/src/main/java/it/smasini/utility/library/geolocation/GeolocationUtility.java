@@ -53,11 +53,11 @@ public class GeolocationUtility {
 
     /**
      * ritorna la distanza in km tra il punto con lat1, lng1 e il punto con lat2, lng2
-     * @param lat1
-     * @param lng1
-     * @param lat2
-     * @param lng2
-     * @return
+     * @param lat1 latitude of first point
+     * @param lng1 longitude of first point
+     * @param lat2 latitude of second point
+     * @param lng2 longitude of second point
+     * @return distance
      */
     public static double getDistance(double lat1, double lng1, double lat2, double lng2){
         double lat1rad = getDegrees(lat1);

@@ -31,8 +31,9 @@ public class FolderUtility {
     }
 
     /**
-     * require  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+     * require   uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
      * in manifest permission
+     * @param name the name of the app
      * @return path of the application data on external memory
      */
     public static String getApplicationFilePath(String name){
@@ -147,6 +148,7 @@ public class FolderUtility {
 
     /**
      * delete all data from the application data directory
+     * @param name the name of the app
      * @return true if data is deleted
      */
     public static boolean deleteAllApplicationData(String name){
@@ -155,7 +157,9 @@ public class FolderUtility {
 
 
     /**
+     * @param size size
      * return memory free on the External memory
+     * @return the memory free
      */
     public static double freeMemory(Size size)
     {
@@ -167,7 +171,7 @@ public class FolderUtility {
     /**
      *
      * @param size in byte
-     * @return value
+     * @return the memory converted
      */
     public static double convertSize(long sizeByte, Size size){
         switch (size){

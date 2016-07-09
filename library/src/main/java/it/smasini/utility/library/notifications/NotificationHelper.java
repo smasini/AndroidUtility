@@ -21,7 +21,7 @@ public class NotificationHelper {
     /**
      * enable notification every 24 hours
      *
-     * @param context
+     * @param context context
      */
     public static void enableNotification(Context context){
         Intent notificationIntent = new Intent(context, NotificationReceiver.class);
@@ -34,7 +34,7 @@ public class NotificationHelper {
 
     /**
      * disable notification
-     * @param context
+     * @param context context
      */
     public static void disableNotification(Context context){
         Intent notificationIntent = new Intent(context, NotificationReceiver.class);
