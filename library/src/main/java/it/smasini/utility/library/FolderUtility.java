@@ -170,7 +170,8 @@ public class FolderUtility {
 
     /**
      *
-     * @param size in byte
+     * @param sizeByte size in byte
+     * @param size type to convert
      * @return the memory converted
      */
     public static double convertSize(long sizeByte, Size size){
