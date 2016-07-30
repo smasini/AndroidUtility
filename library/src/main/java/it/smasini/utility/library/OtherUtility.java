@@ -14,6 +14,10 @@ public class OtherUtility {
         return (context.getResources().getConfiguration().screenLayout & Configuration.SCREENLAYOUT_SIZE_MASK) >= Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
 
+    public static boolean isLandscape(Context context){
+        return context.getResources().getBoolean(R.bool.is_landscape);
+    }
+
     public static boolean isAppInstalled(Context context, String packageName) {
         try {
             context.getPackageManager().getApplicationInfo(packageName, 0);
