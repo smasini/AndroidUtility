@@ -1,8 +1,10 @@
-package it.smasini.utility.library;
+package it.smasini.utility.library.graphics;
 
 import android.content.Context;
 import android.os.Build;
 import android.util.TypedValue;
+
+import it.smasini.utility.library.R;
 
 /**
  * Created by Simone Masini on 27/07/2016.
