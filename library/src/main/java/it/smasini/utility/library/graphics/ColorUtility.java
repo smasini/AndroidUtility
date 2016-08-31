@@ -1,8 +1,13 @@
 package it.smasini.utility.library.graphics;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
+import android.view.Window;
+import android.view.WindowManager;
 
 import it.smasini.utility.library.R;
 
@@ -36,5 +41,12 @@ public class ColorUtility {
         }else{
             return context.getResources().getColor(res);
         }
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static void setStatusBarColor(Activity activity){
+        Window window = activity.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(Color.BLACK);
     }
 }
