@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="label_ok">OK</string>
+    <string name="label_annulla">Annulla</string>
+    <string name="label_progress_download_task">Downloading...</string>
+    <string name="label_progress_dialog_task">Caricamento...</string>
+    <string name="send_email_chooser">Invia email</string>
+    <string name="navigation_drawer_open">Drawer aperto</string>
+    <string name="navigation_drawer_close">Drawer chiuso</string>
+    <string name="recyclerview_delete_item_msg">Un elemento è stato eliminato</string>
+    <string name="recyclerview_delete_item_cancel">Annulla</string>
+</resources>
