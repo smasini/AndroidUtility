@@ -29,13 +29,15 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        int dragFlags = dragEnabled ? ItemTouchHelper.UP | ItemTouchHelper.DOWN : -1;
-        int swipeFlags = swipeEnabled ? ItemTouchHelper.START | ItemTouchHelper.END : -1;
+        int dragFlags = dragEnabled ? ItemTouchHelper.UP | ItemTouchHelper.DOWN : 0;
+        int swipeFlags = swipeEnabled ? ItemTouchHelper.START | ItemTouchHelper.END : 0;
         return makeMovementFlags(dragFlags, swipeFlags);
     }
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        if(!dragEnabled)
+            return false;
         mAdapter.onItemMove(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return true;
     }

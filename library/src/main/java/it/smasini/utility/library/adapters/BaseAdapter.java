@@ -31,7 +31,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
     protected View rootViewForSnackbar;
-    protected int highlightedColor, defaultColor;
+    protected int highlightedColor, defaultColor, selectedColor;
+    private int selectedPosition = -1;
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId, boolean multipleSelectionEnabled) {
         this.mContext = context;
@@ -42,6 +43,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.selectedItems = new SparseBooleanArray();
         this.highlightedColor = ColorUtility.getThemeAccentColor(mContext);
         this.defaultColor = Color.TRANSPARENT;
+        this.selectedColor = Color.TRANSPARENT;
     }
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId){
@@ -89,12 +91,14 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         holder.setIndex(position);
         onBindCustomViewHolder(holder, position, viewModel);
         if(multipleSelectionEnabled){
-            boolean isSelected =isPositionSelected(position);
+            boolean isSelected = isPositionSelected(position);
             if(isSelected)
                 setSelectedStyle(holder);
             else
-                setDeselectedStyle(holder);
+                setDeselectedStyle(holder, position);
             bindElementSelected(holder, viewModel, position, isSelected);
+        }else{
+            setDeselectedStyle(holder, position);
         }
     }
 
@@ -147,8 +151,12 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         holder.changeBackground(highlightedColor);
     }
 
-    private void setDeselectedStyle(BaseAdapter.ViewHolder holder){
-        holder.changeBackground(defaultColor);
+    private void setDeselectedStyle(BaseAdapter.ViewHolder holder, int position){
+        if(position == selectedPosition){
+            holder.changeBackground(selectedColor);
+        }else {
+            holder.changeBackground(defaultColor);
+        }
     }
 
     public void toggleSelection(int pos) {
@@ -196,6 +204,15 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             items.add(viewModels.get(pos));
         }
         return items;
+    }
+
+    public void deleteSelected(){
+        List<T> vms = getSelectedItems();
+        for (T vm : vms) {
+            int pos = getPosition(vm);
+            viewModels.remove(pos);
+            notifyItemChanged(pos);
+        }
     }
 
     public boolean isPositionSelected(int position){
@@ -304,9 +321,14 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
                 toggleSelection(index);
             }
             else if(mClickHandler!=null) {
+                int oldSelected = selectedPosition;
                 int adapterPosition = getAdapterPosition();
+                selectedPosition = adapterPosition;
                 T viewModel = viewModels.get(adapterPosition);
                 mClickHandler.onClick(viewModel);
+                notifyItemChanged(adapterPosition);
+                if(oldSelected!=-1)
+                    notifyItemChanged(oldSelected);
             }
         }
 
