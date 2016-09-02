@@ -43,10 +43,17 @@ public class ColorUtility {
         }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static void setStatusBarColor(Activity activity){
-        Window window = activity.getWindow();
-        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(Color.BLACK);
+    public static void setStatusBarColor(Activity activity, int color, boolean flag){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = activity.getWindow();
+            if(flag)
+                window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setStatusBarColor(color);
+        }
     }
+
+    public static void setStatusBarColor(Activity activity, int color){
+        setStatusBarColor(activity,color, false);
+    }
+
 }

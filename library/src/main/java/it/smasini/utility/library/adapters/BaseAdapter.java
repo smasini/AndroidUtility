@@ -2,6 +2,7 @@ package it.smasini.utility.library.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import it.smasini.utility.library.R;
 import it.smasini.utility.library.graphics.ColorUtility;
@@ -31,7 +33,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
     protected View rootViewForSnackbar;
-    protected int highlightedColor, defaultColor, selectedColor;
+    protected int highlightedColor, defaultColor, selectedColor, swipedColor;
     private int selectedPosition = -1;
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId, boolean multipleSelectionEnabled) {
@@ -44,6 +46,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.highlightedColor = ColorUtility.getThemeAccentColor(mContext);
         this.defaultColor = Color.TRANSPARENT;
         this.selectedColor = Color.TRANSPARENT;
+        this.swipedColor = defaultColor;
     }
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId){
@@ -90,12 +93,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         T viewModel = viewModels.get(position);
         holder.setIndex(position);
         onBindCustomViewHolder(holder, position, viewModel);
-        if(multipleSelectionEnabled){
+        if(multipleSelectionEnabled && isOneItemSelected()){
             boolean isSelected = isPositionSelected(position);
             if(isSelected)
                 setSelectedStyle(holder);
-            else
+            else {
                 setDeselectedStyle(holder, position);
+            }
             bindElementSelected(holder, viewModel, position, isSelected);
         }else{
             setDeselectedStyle(holder, position);
@@ -211,7 +215,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         for (T vm : vms) {
             int pos = getPosition(vm);
             viewModels.remove(pos);
-            notifyItemChanged(pos);
+            notifyItemRemoved(pos);
         }
     }
 
@@ -247,6 +251,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         return mContext.getString(R.string.recyclerview_delete_item_msg);
     }
 
+    protected String getDeleteText(){
+        return mContext.getString(R.string.recyclerview_delete_text);
+    }
+
+
     public void enableGesture(RecyclerView recyclerView, boolean dragMove, boolean swipeDelete){
         if(multipleSelectionEnabled){
             dragMove = false;
@@ -272,7 +281,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
             @Override
             public void onItemDismiss(final int position) {
-                final T vm = viewModels.remove(position);
+                final T vm = viewModels.get(position);
+                viewModels.remove(position);
                 notifyItemRemoved(position);
                 Snackbar snackbar = Snackbar.make(rootViewForSnackbar, getCancelText(), Snackbar.LENGTH_LONG).setAction(getCancelButtontext(), new View.OnClickListener() {
                     @Override
@@ -293,6 +303,23 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
                     }
                 });
                 snackbar.show();
+            }
+
+            @Override
+            public boolean isMovementAllowed(int position) {
+                if(multipleSelectionEnabled)
+                    return !isOneItemSelected();
+                return true;
+            }
+
+            @Override
+            public int getSwipedColor() {
+                return swipedColor;
+            }
+
+            @Override
+            public String getSwipeText() {
+                return getDeleteText();
             }
         }, swipeDelete, dragMove);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);

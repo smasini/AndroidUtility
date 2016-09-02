@@ -33,4 +33,10 @@ public interface ItemTouchHelperAdapter {
      * @see RecyclerView.ViewHolder#getAdapterPosition()
      */
     void onItemDismiss(int position);
+
+    boolean isMovementAllowed(int position);
+
+    int getSwipedColor();
+
+    String getSwipeText();
 }

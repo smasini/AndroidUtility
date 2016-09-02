@@ -9,4 +9,5 @@
     <string name="navigation_drawer_close">Drawer close</string>
     <string name="recyclerview_delete_item_msg">One item is deleted</string>
     <string name="recyclerview_delete_item_cancel">Undo</string>
+    <string name="recyclerview_delete_text">Delete</string>
 </resources>
