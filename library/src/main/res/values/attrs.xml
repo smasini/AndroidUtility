@@ -4,4 +4,8 @@
         <attr name="hintText" format="string" />
         <attr name="threshold" format="integer" />
     </declare-styleable>
+    <declare-styleable name="CustomSpinner">
+        <attr name="spinner_item_resource" format="reference" />
+        <attr name="spinner_dropdown_item_resource" format="reference" />
+    </declare-styleable>
 </resources>
