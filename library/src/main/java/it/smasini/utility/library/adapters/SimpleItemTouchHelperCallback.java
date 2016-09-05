@@ -4,6 +4,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
@@ -19,11 +21,12 @@ import it.smasini.utility.library.R;
 public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
     private final ItemTouchHelperAdapter mAdapter;
-    private boolean swipeEnabled, dragEnabled;
+    private boolean swipeRightEnabled, swipeLeftEnabled, dragEnabled;
 
-    public SimpleItemTouchHelperCallback(ItemTouchHelperAdapter adapter, boolean swipeEnabled, boolean dragEnabled) {
+    public SimpleItemTouchHelperCallback(ItemTouchHelperAdapter adapter, boolean swipeRightEnabled, boolean swipeLeftEnabled, boolean dragEnabled) {
         mAdapter = adapter;
-        this.swipeEnabled = swipeEnabled;
+        this.swipeRightEnabled = swipeRightEnabled;
+        this.swipeLeftEnabled = swipeLeftEnabled;
         this.dragEnabled = dragEnabled;
     }
 
@@ -33,16 +36,17 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     }
 
     @Override
-    public boolean isItemViewSwipeEnabled() {
-        return swipeEnabled;
-    }
-
-    @Override
     public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         if(!mAdapter.isMovementAllowed(viewHolder.getAdapterPosition()))
             return 0;
         int dragFlags = dragEnabled ? ItemTouchHelper.UP | ItemTouchHelper.DOWN : 0;
-        int swipeFlags = swipeEnabled ? ItemTouchHelper.START /*| ItemTouchHelper.END*/ : 0;
+        int swipeFlags = 0;
+        if(swipeRightEnabled){
+            swipeFlags = ItemTouchHelper.START;
+        }
+        if(swipeLeftEnabled){
+            swipeFlags = swipeFlags == 0 ? ItemTouchHelper.END : swipeFlags | ItemTouchHelper.END;
+        }
         return makeMovementFlags(dragFlags, swipeFlags);
     }
 
@@ -57,7 +61,11 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
         int pos = viewHolder.getAdapterPosition();
-        mAdapter.onItemDismiss(pos);
+        if(direction == ItemTouchHelper.START){
+            mAdapter.onRightSwipe(pos);
+        }else{
+            mAdapter.onLeftSwipe(pos);
+        }
     }
 
     @Override
@@ -66,51 +74,34 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
 
         // not sure why, but this method get's called for viewholder that are already swiped away
         if (viewHolder.getAdapterPosition() == -1) {
-            // not interested in those
             return;
         }
 
-
         Paint p = new Paint();
+        Paint p2 = new Paint();
+
+        p2.setTextSize(25);
+        p2.setTypeface(Typeface.DEFAULT_BOLD);
+        int marginText = 30;
+
+        float height = (float) itemView.getBottom() - (float) itemView.getTop();
+        float textSize = p2.getTextSize();
+        int yPos = itemView.getTop() + (int)(height/2) + (int)(textSize/2);
 
         if (dX > 0) {
-            //per ora mai chiamato
-            p.setColor(mAdapter.getSwipedColor());
-
-            // Draw Rect with varying right side, equal to displacement dX
+            p.setColor(mAdapter.getColorSwipeLeft());
+            p2.setColor(mAdapter.getColorTextSwipeLeft());
             c.drawRect((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom(), p);
+            int xPos = (int)dX - marginText - (int)p2.measureText(mAdapter.getTextSwipeLeft());
+            c.drawText(mAdapter.getTextSwipeLeft(), xPos, yPos, p2);
         } else {
-            // Draw Rect with varying left side, equal to the item's right side plus negative displacement dX
-            p.setColor(mAdapter.getSwipedColor());
+            p.setColor(mAdapter.getColorSwipeRight());
+            p2.setColor(mAdapter.getColorTextSwipeRight());
             c.drawRect((float) itemView.getRight() + dX, (float) itemView.getTop(),(float) itemView.getRight(), (float) itemView.getBottom(), p);
-            p.setColor(Color.WHITE);
-            p.setTextSize(20);
-            //p.setTextAlign(Paint.Align.LEFT);
-            int xPos = (int)dX;
-            if(xPos<0)
-                xPos = xPos*-1;
-            int yPos = (int) ((c.getHeight() / 2) - ((p.descent() + p.ascent()) / 2));
-            c.drawText(mAdapter.getSwipeText(), xPos, yPos, p);
+            int xPos = (int)(itemView.getRight()+ dX) + marginText;
+            c.drawText(mAdapter.getTextSwipeRight(), xPos, yPos, p2);
         }
 
-        //c.drawText("Elimina", itemView.getRight() + (int) dX, itemView.getTop(), );
-        /*
-        // draw x mark
-        int itemHeight = itemView.getBottom() - itemView.getTop();
-        int intrinsicWidth = xMark.getIntrinsicWidth();
-        int intrinsicHeight = xMark.getIntrinsicWidth();
-
-        int xMarkLeft = itemView.getRight() - xMarkMargin - intrinsicWidth;
-        int xMarkRight = itemView.getRight() - xMarkMargin;
-        int xMarkTop = itemView.getTop() + (itemHeight - intrinsicHeight)/2;
-        int xMarkBottom = xMarkTop + intrinsicHeight;
-        xMark.setBounds(xMarkLeft, xMarkTop, xMarkRight, xMarkBottom);
-
-        xMark.draw(c);*/
-
-
-
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
     }
 }

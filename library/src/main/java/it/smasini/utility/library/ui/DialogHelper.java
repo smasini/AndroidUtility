@@ -72,7 +72,16 @@ public class DialogHelper {
         void onCancel();
     }
 
-    public static void alert(Activity activity, String title, String message) {
+    public static void alert(Activity activity, String title, String message){
+        alert(activity,title, message, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+    }
+
+    public static void alert(Activity activity, String title, String message, DialogInterface.OnClickListener clickListener) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AlertDialogStyle);
 
         if(title != null)
@@ -80,12 +89,7 @@ public class DialogHelper {
         if(message!= null)
             builder.setMessage(message);
 
-        builder.setNegativeButton(activity.getString(R.string.label_ok), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
+        builder.setNegativeButton(activity.getString(R.string.label_ok), clickListener);
         builder.show();
     }
 

@@ -2,7 +2,6 @@ package it.smasini.utility.library.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -12,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import it.smasini.utility.library.R;
 import it.smasini.utility.library.graphics.ColorUtility;
@@ -33,7 +31,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
     protected View rootViewForSnackbar;
-    protected int highlightedColor, defaultColor, selectedColor, swipedColor;
+    protected int highlightedColor, defaultColor, selectedColor, swipedRightColor, swipedLeftColor, swipedRightTextColor, swipedLeftTextColor;
     private int selectedPosition = -1;
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId, boolean multipleSelectionEnabled) {
@@ -46,7 +44,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.highlightedColor = ColorUtility.getThemeAccentColor(mContext);
         this.defaultColor = Color.TRANSPARENT;
         this.selectedColor = Color.TRANSPARENT;
-        this.swipedColor = defaultColor;
+        this.swipedRightColor = defaultColor;
+        this.swipedLeftColor = defaultColor;
+        this.swipedRightTextColor = defaultColor;
+        this.swipedLeftTextColor = defaultColor;
     }
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId){
@@ -243,20 +244,28 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             onSwapData.onSwap(newList);
     }
 
-    protected String getCancelButtontext(){
+    protected String getCancelButtonText(){
         return mContext.getString(R.string.recyclerview_delete_item_cancel);
     }
 
-    protected String getCancelText(){
+    protected String getMessageAfterSwipeRightItem(){
         return mContext.getString(R.string.recyclerview_delete_item_msg);
     }
 
-    protected String getDeleteText(){
-        return mContext.getString(R.string.recyclerview_delete_text);
+    protected String getMessageAfterSwipeLeftItem(){
+        return mContext.getString(R.string.recyclerview_delete_item_msg);
+    }
+
+    protected String getSwipeRightText(){
+        return mContext.getString(R.string.recyclerview_delete_text).toUpperCase();
+    }
+
+    protected String getSwipeLeftText(){
+        return mContext.getString(R.string.recyclerview_delete_text).toUpperCase();
     }
 
 
-    public void enableGesture(RecyclerView recyclerView, boolean dragMove, boolean swipeDelete){
+    public void enableGesture(RecyclerView recyclerView, boolean dragMove, boolean swipeRight, boolean swipeLeft){
         if(multipleSelectionEnabled){
             dragMove = false;
         }
@@ -280,29 +289,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
 
             @Override
-            public void onItemDismiss(final int position) {
-                final T vm = viewModels.get(position);
-                viewModels.remove(position);
-                notifyItemRemoved(position);
-                Snackbar snackbar = Snackbar.make(rootViewForSnackbar, getCancelText(), Snackbar.LENGTH_LONG).setAction(getCancelButtontext(), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        viewModels.add(position, vm);
-                        notifyItemInserted(position);
-                    }
-                });
-                snackbar.setCallback(new Snackbar.Callback() {
-                    @Override
-                    public void onDismissed(Snackbar snackbar, int event) {
-                        super.onDismissed(snackbar, event);
-                        if(event!= Snackbar.Callback.DISMISS_EVENT_ACTION){
-                            if(gestureEvent!=null){
-                                gestureEvent.deleted(vm, position);
-                            }
-                        }
-                    }
-                });
-                snackbar.show();
+            public void onRightSwipe(final int position) {
+                onSwipe(position, false);
+            }
+
+            @Override
+            public void onLeftSwipe(int position) {
+                onSwipe(position, true);
             }
 
             @Override
@@ -313,17 +306,67 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
 
             @Override
-            public int getSwipedColor() {
-                return swipedColor;
+            public int getColorSwipeRight() {
+                return swipedRightColor;
             }
 
             @Override
-            public String getSwipeText() {
-                return getDeleteText();
+            public int getColorSwipeLeft() {
+                return swipedLeftColor;
             }
-        }, swipeDelete, dragMove);
+
+            @Override
+            public int getColorTextSwipeRight() {
+                return swipedRightTextColor;
+            }
+
+            @Override
+            public int getColorTextSwipeLeft() {
+                return swipedLeftTextColor;
+            }
+
+            @Override
+            public String getTextSwipeRight() {
+                return getSwipeRightText();
+            }
+
+            @Override
+            public String getTextSwipeLeft() {
+                return getSwipeLeftText();
+            }
+
+        }, swipeRight, swipeLeft, dragMove);
         ItemTouchHelper touchHelper = new ItemTouchHelper(callback);
         touchHelper.attachToRecyclerView(recyclerView);
+    }
+
+    protected void onSwipe(final int position, final boolean left){
+        final T vm = viewModels.get(position);
+        viewModels.remove(position);
+        notifyItemRemoved(position);
+        Snackbar snackbar = Snackbar.make(rootViewForSnackbar, left ? getMessageAfterSwipeLeftItem() : getMessageAfterSwipeRightItem(), Snackbar.LENGTH_LONG).setAction(getCancelButtonText(), new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                viewModels.add(position, vm);
+                notifyItemInserted(position);
+            }
+        });
+        snackbar.setCallback(new Snackbar.Callback() {
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                super.onDismissed(snackbar, event);
+                if(event!= Snackbar.Callback.DISMISS_EVENT_ACTION){
+                    if(gestureEvent!=null){
+                        if(left){
+                            gestureEvent.onLeftSwipe(vm, position);
+                        }else{
+                            gestureEvent.onRightSwipe(vm, position);
+                        }
+                    }
+                }
+            }
+        });
+        snackbar.show();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
@@ -388,7 +431,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public interface OnGestureEvent<T>{
-        void deleted(T viewModel, int position);
+        void onRightSwipe(T viewModel, int position);
+        void onLeftSwipe(T viewModel, int position);
         void moved(T viewModel, int newPosition, int oldPosition);
     }
 
