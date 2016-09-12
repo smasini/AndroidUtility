@@ -28,6 +28,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected OnSwapData<T> onSwapData;
     private SparseBooleanArray selectedItems;
     private List<T> viewModels = new ArrayList<>();
+    private List<T> originalViewModels;
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
     protected View rootViewForSnackbar;
@@ -236,6 +237,15 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public void swapData(List<T> newList){
+     swapData(newList, false);
+    }
+
+    public void swapData(List<T> newList, boolean saveOriginal){
+        if(saveOriginal){
+            if(originalViewModels==null) {
+                originalViewModels = new ArrayList<>(viewModels);
+            }
+        }
         viewModels = newList;
         notifyDataSetChanged();
         if(mEmptyView!=null)
@@ -375,7 +385,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public void filterData(String filter){
         if(filter==null || filter.equals("")) {
-            swapData(viewModels);
+            if(originalViewModels==null){
+                swapData(viewModels);
+            }else {
+                swapData(originalViewModels);
+            }
             return;
         }
         List<T> dataFilter = new ArrayList<>();
@@ -383,7 +397,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             if(checkFilter(vm, filter))
                 dataFilter.add(vm);
         }
-        swapData(dataFilter);
+        swapData(dataFilter, true);
     }
 
     public void clearFilter(){
