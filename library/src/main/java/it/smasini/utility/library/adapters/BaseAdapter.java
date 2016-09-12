@@ -369,6 +369,27 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         snackbar.show();
     }
 
+    public boolean checkFilter(T vm, String text){
+        return false;
+    }
+
+    public void filterData(String filter){
+        if(filter==null || filter.equals("")) {
+            swapData(viewModels);
+            return;
+        }
+        List<T> dataFilter = new ArrayList<>();
+        for(T vm : viewModels){
+            if(checkFilter(vm, filter))
+                dataFilter.add(vm);
+        }
+        swapData(dataFilter);
+    }
+
+    public void clearFilter(){
+        filterData(null);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
 
         public int index;
