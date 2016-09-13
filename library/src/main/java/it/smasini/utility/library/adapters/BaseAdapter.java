@@ -393,7 +393,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             return;
         }
         List<T> dataFilter = new ArrayList<>();
-        for(T vm : viewModels){
+        for(T vm : originalViewModels){
             if(checkFilter(vm, filter))
                 dataFilter.add(vm);
         }
