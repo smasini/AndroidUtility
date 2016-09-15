@@ -20,6 +20,8 @@ import it.smasini.utility.library.graphics.ColorUtility;
  */
 public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>.ViewHolder>  {
 
+    final protected int VIEW_TYPE_DEFAULT = 1;
+
     final protected Context mContext;
     final private int layoutId;
     private boolean multipleSelectionEnabled;
@@ -80,9 +82,23 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     @Override
+    public int getItemViewType(int position) {
+        T model = viewModels.get(position);
+        return getItemViewType(model);
+    }
+
+    public int getItemViewType(T model){
+        return VIEW_TYPE_DEFAULT;
+    }
+
+    public int getLayoutForType(int viewType){
+        return layoutId;
+    }
+
+    @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         if (viewGroup instanceof RecyclerView) {
-            View view = LayoutInflater.from(viewGroup.getContext()).inflate(layoutId, viewGroup, false);
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(getLayoutForType(viewType), viewGroup, false);
             view.setFocusable(true);
             return getViewHolder(view);
         }else {
@@ -219,6 +235,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             viewModels.remove(pos);
             notifyItemRemoved(pos);
         }
+    }
+
+    public void deleteItem(int position){
+        viewModels.remove(position);
+        notifyItemRemoved(position);
     }
 
     public boolean isPositionSelected(int position){
