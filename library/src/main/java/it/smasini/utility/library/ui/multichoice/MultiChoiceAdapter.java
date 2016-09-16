@@ -19,7 +19,7 @@ public class MultiChoiceAdapter extends BaseAdapter<MultiChoiceModel> {
     }
 
     @Override
-    public void onBindCustomViewHolder(ViewHolder viewHolder, final int position, MultiChoiceModel viewModel) {
+    public void onBindCustomViewHolder(final ViewHolder viewHolder, final int position, final MultiChoiceModel viewModel) {
         MyViewHolder myViewHolder = (MyViewHolder) viewHolder;
         if(viewModel.isEnabled()) {
             myViewHolder.label.setText(viewModel.getLabel());
@@ -27,6 +27,7 @@ public class MultiChoiceAdapter extends BaseAdapter<MultiChoiceModel> {
             myViewHolder.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                    viewModel.setSelected(b);
                     toggleSelection(position);
                 }
             });

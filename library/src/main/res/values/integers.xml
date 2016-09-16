@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="landscape" type="integer">0</item>
+    <item name="portrait" type="integer">1</item>
+    <item name="portraitPhoneLandscapeTablet" type="integer">@integer/portrait</item>
+</resources>

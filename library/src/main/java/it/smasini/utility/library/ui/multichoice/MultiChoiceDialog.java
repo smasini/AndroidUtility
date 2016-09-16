@@ -22,16 +22,17 @@ public class MultiChoiceDialog  {
     private List<MultiChoiceModel> multiChoiceItems;
     private MultiChoiceAdapter adapter;
     private OnConfirm onConfirm;
+    private AlertDialog.Builder builder;
 
-    protected MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems) {
+    public MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems) {
         this.mContext = context;
         this.multiChoiceItems = multiChoiceItems;
         this.mTitle = title;
-        initAndshow();
+        init();
     }
 
-    private void initAndshow(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, R.style.AlertDialogStyle);
+    private void init(){
+        builder = new AlertDialog.Builder(mContext, getStyle());
         if(mTitle != null)
             builder.setTitle(mTitle);
         builder.setNegativeButton(mContext.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
@@ -60,7 +61,9 @@ public class MultiChoiceDialog  {
         adapter = new MultiChoiceAdapter(mContext);
         recyclerView.setAdapter(adapter);
         adapter.swapData(multiChoiceItems);
+    }
 
+    public void show(){
         builder.show();
     }
 
@@ -72,5 +75,8 @@ public class MultiChoiceDialog  {
         void onSelectionComplete(List<MultiChoiceModel> models);
     }
 
+    protected int getStyle(){
+        return R.style.AlertDialogStyle;
+    }
 
 }
