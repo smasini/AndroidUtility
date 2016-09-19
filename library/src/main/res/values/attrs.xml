@@ -8,4 +8,9 @@
         <attr name="spinner_item_resource" format="reference" />
         <attr name="spinner_dropdown_item_resource" format="reference" />
     </declare-styleable>
+    <declare-styleable name="DatePicker">
+        <attr name="dateFormat" format="string" />
+        <attr name="dataPickerInitOnStart" format="boolean" />
+        <attr name="dataPickerDarkStyle" format="boolean" />
+    </declare-styleable>
 </resources>

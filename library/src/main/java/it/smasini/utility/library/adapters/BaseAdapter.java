@@ -36,6 +36,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected View rootViewForSnackbar;
     protected int highlightedColor, defaultColor, selectedColor, swipedRightColor, swipedLeftColor, swipedRightTextColor, swipedLeftTextColor;
     private int selectedPosition = -1;
+    protected boolean isOnBind = false;
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId, boolean multipleSelectionEnabled) {
         this.mContext = context;
@@ -110,6 +111,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     public void onBindViewHolder(BaseAdapter<T>.ViewHolder holder, int position) {
         T viewModel = viewModels.get(position);
         holder.setIndex(position);
+        isOnBind = true;
         onBindCustomViewHolder(holder, position, viewModel);
         if(multipleSelectionEnabled && isOneItemSelected()){
             boolean isSelected = isPositionSelected(position);
@@ -122,6 +124,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         }else{
             setDeselectedStyle(holder, position);
         }
+        isOnBind = false;
     }
 
     public void setMultipleSelectionEvent(OnMultipleSelectionEvent<T> multipleSelectionEvent) {
@@ -204,7 +207,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
                 multipleSelectionEvent.onStopMultipleSelection();
             }
         }
-        notifyItemChanged(pos);
+        if(!isOnBind)
+            notifyItemChanged(pos);
     }
 
     public void clearSelections() {
@@ -239,7 +243,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public void deleteItem(int position){
         viewModels.remove(position);
-        notifyItemRemoved(position);
+        if(!isOnBind)
+            notifyItemRemoved(position);
     }
 
     public boolean isPositionSelected(int position){

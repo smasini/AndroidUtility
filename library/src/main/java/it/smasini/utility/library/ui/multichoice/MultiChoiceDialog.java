@@ -1,12 +1,14 @@
 package it.smasini.utility.library.ui.multichoice;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 
 import java.util.List;
 
@@ -22,7 +24,7 @@ public class MultiChoiceDialog  {
     private List<MultiChoiceModel> multiChoiceItems;
     private MultiChoiceAdapter adapter;
     private OnConfirm onConfirm;
-    private AlertDialog.Builder builder;
+    private Dialog dialog;
 
     public MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems) {
         this.mContext = context;
@@ -32,7 +34,7 @@ public class MultiChoiceDialog  {
     }
 
     private void init(){
-        builder = new AlertDialog.Builder(mContext, getStyle());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, getStyle());
         if(mTitle != null)
             builder.setTitle(mTitle);
         builder.setNegativeButton(mContext.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
@@ -61,10 +63,20 @@ public class MultiChoiceDialog  {
         adapter = new MultiChoiceAdapter(mContext);
         recyclerView.setAdapter(adapter);
         adapter.swapData(multiChoiceItems);
+
+        dialog = builder.create();
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+        lp.copyFrom(dialog.getWindow().getAttributes());
+        lp.width = (int)mContext.getResources().getDimension(R.dimen.multi_choice_dialog_width);
+        lp.height = (int)mContext.getResources().getDimension(R.dimen.multi_choice_dialog_height);
+
+        dialog.show();
+        dialog.getWindow().setAttributes(lp);
     }
 
     public void show(){
-        builder.show();
+        dialog.show();
     }
 
     public void setOnConfirm(OnConfirm onConfirm) {
