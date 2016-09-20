@@ -11,9 +11,11 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.EditText;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import it.smasini.utility.library.R;
 
@@ -92,6 +94,24 @@ public class DatePicker extends EditText implements DatePickerDialog.OnDateSetLi
                 dpd.show();
             }
         });
+        this.setOnFocusChangeListener(new OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(!b){
+                    String dateString = getText().toString();
+                    Calendar cal = Calendar.getInstance();
+                    SimpleDateFormat sdf = new SimpleDateFormat(dateFormat, getResources().getConfiguration().locale);
+                    try {
+                        Date d = sdf.parse(dateString);
+                        cal.setTime(d);
+                        currentDate = d;
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        setText(sdf.format(currentDate));
+                    }
+                }
+            }
+        });
     }
 
     private int getDatePickerStyle(){
@@ -141,6 +161,12 @@ public class DatePicker extends EditText implements DatePickerDialog.OnDateSetLi
 
     public Date getCurrentDate(){
         return currentDate;
+    }
+
+    public void setCurrentDate(Date date){
+        currentDate = date;
+        SimpleDateFormat format = new SimpleDateFormat(dateFormat, getResources().getConfiguration().locale);
+        setText(format.format(currentDate));
     }
 
     public String getSelectedDate(){

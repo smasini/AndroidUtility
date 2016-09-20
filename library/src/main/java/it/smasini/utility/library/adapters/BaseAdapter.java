@@ -184,7 +184,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         }
     }
 
-    public void toggleSelection(int pos) {
+    public void toggleSelection(int pos){
+        toggleSelection(pos, true);
+    }
+
+    public void toggleSelection(int pos, boolean notify) {
         boolean started = isOneItemSelected();
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);
@@ -207,7 +211,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
                 multipleSelectionEvent.onStopMultipleSelection();
             }
         }
-        if(!isOnBind)
+        if(notify && !isOnBind)
             notifyItemChanged(pos);
     }
 
@@ -239,6 +243,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             viewModels.remove(pos);
             notifyItemRemoved(pos);
         }
+    }
+
+    public void deleteItem(T vm){
+        int position = getPosition(vm);
+        deleteItem(position);
     }
 
     public void deleteItem(int position){
@@ -449,7 +458,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
         @Override
         public void onClick(View v) {
-            if(isOneItemSelected()){
+            if(multipleSelectionEnabled && isOneItemSelected()){
                 toggleSelection(index);
             }
             else if(mClickHandler!=null) {

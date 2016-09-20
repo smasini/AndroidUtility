@@ -3,16 +3,20 @@ package it.smasini.utility.library.ui.multichoice;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.DialogInterface;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.util.List;
-
 import it.smasini.utility.library.R;
+import it.smasini.utility.library.graphics.DrawableUtility;
+import it.smasini.utility.library.ui.Style;
 
 /**
  * Created by Simone on 15/09/16.
@@ -25,16 +29,22 @@ public class MultiChoiceDialog  {
     private MultiChoiceAdapter adapter;
     private OnConfirm onConfirm;
     private Dialog dialog;
+    protected Style style;
 
-    public MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems) {
+    public MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems){
+        this(context, title, multiChoiceItems, Style.DARK);
+    }
+
+    public MultiChoiceDialog(Activity context, String title, List<MultiChoiceModel> multiChoiceItems, Style style) {
         this.mContext = context;
         this.multiChoiceItems = multiChoiceItems;
         this.mTitle = title;
+        this.style = style;
         init();
     }
 
     private void init(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, getStyle());
+        AlertDialog.Builder builder = new AlertDialog.Builder(mContext, getStyleDialog());
         if(mTitle != null)
             builder.setTitle(mTitle);
         builder.setNegativeButton(mContext.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
@@ -61,6 +71,7 @@ public class MultiChoiceDialog  {
         StaggeredGridLayoutManager sglm = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(sglm);
         adapter = new MultiChoiceAdapter(mContext);
+        adapter.setStyle(style);
         recyclerView.setAdapter(adapter);
         adapter.swapData(multiChoiceItems);
 
@@ -73,6 +84,7 @@ public class MultiChoiceDialog  {
 
         dialog.show();
         dialog.getWindow().setAttributes(lp);
+        dialog.getWindow().setBackgroundDrawable(getDrawable());
     }
 
     public void show(){
@@ -87,8 +99,31 @@ public class MultiChoiceDialog  {
         void onSelectionComplete(List<MultiChoiceModel> models);
     }
 
-    protected int getStyle(){
-        return R.style.AlertDialogStyle;
+    protected int getStyleDialog(){
+        switch (style){
+            case LIGHT:
+                return R.style.AlertDialogStyleLight;
+            default:
+            case DARK:
+                return R.style.AlertDialogStyle;
+        }
     }
 
+    protected Drawable getDrawable(){
+        switch (style){
+            case LIGHT:
+                return getDrawableLight();
+            default:
+            case DARK:
+                return getDrawableDark();
+        }
+    }
+
+    private Drawable getDrawableLight(){
+         return DrawableUtility.getDrawable(mContext, android.R.drawable.dialog_holo_light_frame);
+    }
+
+    private Drawable getDrawableDark(){
+        return DrawableUtility.getDrawable(mContext, android.R.drawable.dialog_holo_dark_frame);
+    }
 }
