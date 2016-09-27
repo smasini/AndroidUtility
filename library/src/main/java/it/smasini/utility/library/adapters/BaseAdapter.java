@@ -29,7 +29,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private View mEmptyView;
     protected OnSwapData<T> onSwapData;
     private SparseBooleanArray selectedItems;
-    private List<T> viewModels = new ArrayList<>();
+    protected List<T> viewModels = new ArrayList<>();
     private List<T> originalViewModels;
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
@@ -170,6 +170,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
         }
         return -1;
+    }
+
+    public T getItem(int position){
+        return viewModels.get(position);
     }
 
     private void setSelectedStyle(BaseAdapter.ViewHolder holder){
