@@ -137,6 +137,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public void setEmptyView(View emptyView) {
         this.mEmptyView = emptyView;
+        if(getItemCount()==0){
+            mEmptyView.setVisibility(View.VISIBLE);
+        }else{
+            mEmptyView.setVisibility(View.GONE);
+        }
     }
 
     public void setOnClickHandler(OnClickHandler<T> onClickHandler) {
