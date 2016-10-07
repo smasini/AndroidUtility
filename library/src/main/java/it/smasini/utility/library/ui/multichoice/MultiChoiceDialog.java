@@ -95,7 +95,7 @@ public class MultiChoiceDialog  {
         this.onConfirm = onConfirm;
     }
 
-    public interface OnConfirm{
+    public interface OnConfirm {
         void onSelectionComplete(List<MultiChoiceModel> models);
     }
 

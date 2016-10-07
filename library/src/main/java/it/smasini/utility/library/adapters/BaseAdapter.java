@@ -263,6 +263,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         viewModels.remove(position);
         if(!isOnBind)
             notifyItemRemoved(position);
+        if(mEmptyView!=null) {
+            if (getItemCount() == 0) {
+                mEmptyView.setVisibility(View.VISIBLE);
+            }else{
+                mEmptyView.setVisibility(View.GONE);
+            }
+        }
     }
 
     public boolean isPositionSelected(int position){
@@ -447,6 +454,34 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public void clearFilter(){
         filterData(null);
+    }
+
+    public void setHighlightedColor(int highlightedColor) {
+        this.highlightedColor = highlightedColor;
+    }
+
+    public void setDefaultColor(int defaultColor) {
+        this.defaultColor = defaultColor;
+    }
+
+    public void setSelectedColor(int selectedColor) {
+        this.selectedColor = selectedColor;
+    }
+
+    public void setSwipedRightColor(int swipedRightColor) {
+        this.swipedRightColor = swipedRightColor;
+    }
+
+    public void setSwipedLeftColor(int swipedLeftColor) {
+        this.swipedLeftColor = swipedLeftColor;
+    }
+
+    public void setSwipedRightTextColor(int swipedRightTextColor) {
+        this.swipedRightTextColor = swipedRightTextColor;
+    }
+
+    public void setSwipedLeftTextColor(int swipedLeftTextColor) {
+        this.swipedLeftTextColor = swipedLeftTextColor;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{

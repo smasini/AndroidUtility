@@ -5,8 +5,16 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.EditText;
+import android.widget.FrameLayout;
+
+import java.util.List;
 
 import it.smasini.utility.library.R;
+import it.smasini.utility.library.SizeUtility;
+import it.smasini.utility.library.adapters.SpinnerItem;
 
 /**
  * Created by Simone Masini on 30/06/2016
@@ -72,6 +80,16 @@ public class DialogHelper {
         void onCancel();
     }
 
+    public interface EditTextHandler{
+        void onEditTextCreated(EditText editText);
+    }
+
+    public interface SpinnerHandler{
+        void onSpinnerCreated(CustomSpinner spinner);
+        List<SpinnerItem> getItems();
+        void onPositiveButtonClick(String selectedValue);
+    }
+
     public static void alert(Activity activity, String title, String message){
         alert(activity,title, message, new DialogInterface.OnClickListener() {
             @Override
@@ -110,5 +128,71 @@ public class DialogHelper {
         builder.show();
     }
 
+    public static void alertInputText(Context context, String title, String message, DialogInterface.OnClickListener positiveButtonClick){
+        alertInputText(context, title, message, positiveButtonClick, null);
+    }
 
+    public static void alertInputText(Context context, String title, String message, DialogInterface.OnClickListener positiveButtonClick, EditTextHandler editTextHandler){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if(title!=null)
+            builder.setTitle(title);
+        if(message!=null)
+            builder.setMessage(message);
+
+        EditText input = new EditText(context);
+        builder.setView(input);
+        if(editTextHandler!=null){
+            editTextHandler.onEditTextCreated(input);
+        }
+        builder.setPositiveButton(context.getString(R.string.label_ok),positiveButtonClick);
+        builder.setNegativeButton(context.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.show();
+    }
+
+    public static void alertSpinnerInput(Context context, String title, String message, final SpinnerHandler spinnerHandler){
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        if(title!=null)
+            builder.setTitle(title);
+        if(message!=null)
+            builder.setMessage(message);
+
+        FrameLayout frameLayout = new FrameLayout(context);
+
+        final CustomSpinner spinner = new CustomSpinner(context);
+        FrameLayout.LayoutParams params = new  FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        int margin = (int) SizeUtility.convertDpToPixel(8, context);
+        params.setMargins(margin,margin,margin,margin);
+        spinner.setLayoutParams(params);
+        frameLayout.addView(spinner);
+        builder.setView(frameLayout);
+        if(spinnerHandler!=null){
+            spinnerHandler.onSpinnerCreated(spinner);
+            spinner.setItems(spinnerHandler.getItems());
+        }
+        builder.setPositiveButton(context.getString(R.string.label_ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if(spinnerHandler!=null){
+                    spinnerHandler.onPositiveButtonClick(spinner.getSelectedValue());
+                }
+                dialogInterface.dismiss();
+            }
+        });
+        builder.setNegativeButton(context.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.show();
+    }
 }
