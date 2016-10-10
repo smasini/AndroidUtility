@@ -23,10 +23,16 @@ public class DialogHelper {
 
     private static ProgressDialog progressDialog;
     private static ProgressDialog progressDialogDeterminate;
+    public static int alertDialogStyle = -1;
+    public static int dialogStyle = -1;
 
     public static void showDialog(Context context){
         if(progressDialog == null){
-            progressDialog = new ProgressDialog(context, R.style.DialogStyle);
+            if(dialogStyle==-1){
+                progressDialogDeterminate = new ProgressDialog(context);
+            }else{
+                progressDialogDeterminate = new ProgressDialog(context, dialogStyle);
+            }
         }
         progressDialog.setMessage(context.getString(R.string.label_progress_dialog_task));
 
@@ -44,7 +50,11 @@ public class DialogHelper {
 
     public static void showProgress(Context context, int max, final Callback callback){
         if(progressDialogDeterminate == null){
-            progressDialogDeterminate = new ProgressDialog(context, R.style.DialogStyle);
+            if(dialogStyle==-1){
+                progressDialogDeterminate = new ProgressDialog(context);
+            }else{
+                progressDialogDeterminate = new ProgressDialog(context, dialogStyle);
+            }
         }
         progressDialogDeterminate.setMessage(context.getString(R.string.label_progress_download_task));
 
@@ -100,7 +110,12 @@ public class DialogHelper {
     }
 
     public static void alert(Activity activity, String title, String message, DialogInterface.OnClickListener clickListener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AlertDialogStyle);
+        AlertDialog.Builder builder;
+        if(alertDialogStyle == -1){
+            builder = new AlertDialog.Builder(activity);
+        }else {
+            builder = new AlertDialog.Builder(activity, alertDialogStyle);
+        }
 
         if(title != null)
             builder.setTitle(title);
@@ -112,7 +127,12 @@ public class DialogHelper {
     }
 
     public static void warning(Activity activity, String title, String message, DialogInterface.OnClickListener positiveButtonClick){
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.AlertDialogStyle);
+        AlertDialog.Builder builder;
+        if(alertDialogStyle == -1){
+            builder = new AlertDialog.Builder(activity);
+        }else {
+            builder = new AlertDialog.Builder(activity, alertDialogStyle);
+        }
 
         if(title != null)
             builder.setTitle(title);
@@ -133,7 +153,12 @@ public class DialogHelper {
     }
 
     public static void alertInputText(Context context, String title, String message, DialogInterface.OnClickListener positiveButtonClick, EditTextHandler editTextHandler){
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder;
+        if(alertDialogStyle == -1){
+            builder = new AlertDialog.Builder(context);
+        }else {
+            builder = new AlertDialog.Builder(context, alertDialogStyle);
+        }
         if(title!=null)
             builder.setTitle(title);
         if(message!=null)
@@ -157,7 +182,12 @@ public class DialogHelper {
     }
 
     public static void alertSpinnerInput(Context context, String title, String message, final SpinnerHandler spinnerHandler){
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        AlertDialog.Builder builder;
+        if(alertDialogStyle == -1){
+            builder = new AlertDialog.Builder(context);
+        }else {
+            builder = new AlertDialog.Builder(context, alertDialogStyle);
+        }
         if(title!=null)
             builder.setTitle(title);
         if(message!=null)
