@@ -3,7 +3,10 @@ package it.smasini.utility.library.adapters;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
@@ -21,9 +24,11 @@ import it.smasini.utility.library.graphics.ColorUtility;
 public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>.ViewHolder>  {
 
     final protected int VIEW_TYPE_DEFAULT = 1;
+    final public int VIEW_TYPE_LOAD = 10000;
 
     final protected Context mContext;
     final private int layoutId;
+    protected int loadingTypeLayoutId = R.layout.base_adapter_loading_item;
     private boolean multipleSelectionEnabled;
     private OnClickHandler<T> mClickHandler;
     private View mEmptyView;
@@ -33,6 +38,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private List<T> originalViewModels;
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
+    private InfinteScrollListener infinteScrollListener;
     protected View rootViewForSnackbar;
     protected int highlightedColor, defaultColor, selectedColor, swipedRightColor, swipedLeftColor, swipedRightTextColor, swipedLeftTextColor;
     private int selectedPosition = -1;
@@ -84,6 +90,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     @Override
     public int getItemViewType(int position) {
+        if(infinteScrollListener!=null && position == getItemCount()-1){
+            return VIEW_TYPE_LOAD;
+        }
         T model = viewModels.get(position);
         return getItemViewType(model);
     }
@@ -93,6 +102,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public int getLayoutForType(int viewType){
+        if(viewType == VIEW_TYPE_LOAD)
+            return loadingTypeLayoutId;
         return layoutId;
     }
 
@@ -110,21 +121,23 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     @Override
     public void onBindViewHolder(BaseAdapter<T>.ViewHolder holder, int position) {
         T viewModel = viewModels.get(position);
-        holder.setIndex(position);
-        isOnBind = true;
-        onBindCustomViewHolder(holder, position, viewModel);
-        if(multipleSelectionEnabled && isOneItemSelected()){
-            boolean isSelected = isPositionSelected(position);
-            if(isSelected)
-                setSelectedStyle(holder);
-            else {
+        if(getItemViewType(viewModel) != VIEW_TYPE_LOAD) {
+            holder.setIndex(position);
+            isOnBind = true;
+            onBindCustomViewHolder(holder, position, viewModel);
+            if (multipleSelectionEnabled && isOneItemSelected()) {
+                boolean isSelected = isPositionSelected(position);
+                if (isSelected)
+                    setSelectedStyle(holder);
+                else {
+                    setDeselectedStyle(holder, position);
+                }
+                bindElementSelected(holder, viewModel, position, isSelected);
+            } else {
                 setDeselectedStyle(holder, position);
             }
-            bindElementSelected(holder, viewModel, position, isSelected);
-        }else{
-            setDeselectedStyle(holder, position);
+            isOnBind = false;
         }
-        isOnBind = false;
     }
 
     public void setMultipleSelectionEvent(OnMultipleSelectionEvent<T> multipleSelectionEvent) {
@@ -288,7 +301,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public void swapData(List<T> newList){
-     swapData(newList, false);
+        swapData(newList, false);
     }
 
     public void swapData(List<T> newList, boolean saveOriginal){
@@ -303,6 +316,19 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
         if(onSwapData!=null)
             onSwapData.onSwap(newList);
+    }
+
+    public void addData(List<T> newList){
+        if(viewModels==null){
+            viewModels = newList;
+        }else {
+            viewModels.addAll(newList);
+        }
+        if(mEmptyView!=null)
+            mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+        if(onSwapData!=null)
+            onSwapData.onSwap(newList);
+        notifyDataSetChanged();
     }
 
     protected String getCancelButtonText(){
@@ -324,7 +350,6 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected String getSwipeLeftText(){
         return mContext.getString(R.string.recyclerview_delete_text).toUpperCase();
     }
-
 
     public void enableGesture(RecyclerView recyclerView, boolean dragMove, boolean swipeRight, boolean swipeLeft){
         if(multipleSelectionEnabled){
@@ -484,6 +509,23 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.swipedLeftTextColor = swipedLeftTextColor;
     }
 
+    public void enableInfiniteScroll(RecyclerView recyclerView, InfinteScrollListener scrollListener){
+        this.infinteScrollListener = scrollListener;
+        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(recyclerView.getLayoutManager()) {
+            @Override
+            public int getFooterViewType(int defaultNoFooterViewType) {
+                return VIEW_TYPE_LOAD;
+            }
+
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                if(infinteScrollListener!=null){
+                    infinteScrollListener.onLoadMore(page, totalItemsCount);
+                }
+            }
+        });
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
 
         public int index;
@@ -549,6 +591,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         void onRightSwipe(T viewModel, int position);
         void onLeftSwipe(T viewModel, int position);
         void moved(T viewModel, int newPosition, int oldPosition);
+    }
+
+    public interface InfinteScrollListener{
+        void onLoadMore(int page, int totalItemsCount);
     }
 
 }
