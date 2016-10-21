@@ -1,8 +1,12 @@
 package it.smasini.utility.library.adapters;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +16,11 @@ import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,23 +35,35 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     final protected int VIEW_TYPE_DEFAULT = 1;
     final public int VIEW_TYPE_LOAD = 10000;
 
+    protected Interpolator mInterpolator = new LinearInterpolator();
     final protected Context mContext;
-    final private int layoutId;
-    protected int loadingTypeLayoutId = R.layout.base_adapter_loading_item;
-    private boolean multipleSelectionEnabled;
-    private OnClickHandler<T> mClickHandler;
     private View mEmptyView;
-    protected OnSwapData<T> onSwapData;
-    private SparseBooleanArray selectedItems;
+    protected View rootViewForSnackbar;
+    final private int layoutId;
+
+    protected int loadingTypeLayoutId = R.layout.base_adapter_loading_item;
+
     protected List<T> viewModels = new ArrayList<>();
     private List<T> originalViewModels;
+
+    private boolean multipleSelectionEnabled, infiniteScrollEnable;
+    protected boolean loadingMoreRecords = false;
+    protected boolean animationScrollEnabled = false;
+    protected boolean isOnItemSelection = false;
+    protected boolean isOnBind = false;
+
+
+    private OnClickHandler<T> mClickHandler;
+    private EndlessRecyclerViewScrollListener endlessRecyclerViewScrollListener;
+    protected OnSwapData<T> onSwapData;
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
     private InfinteScrollListener infinteScrollListener;
-    protected View rootViewForSnackbar;
+
+    private SparseBooleanArray selectedItems;
     protected int highlightedColor, defaultColor, selectedColor, swipedRightColor, swipedLeftColor, swipedRightTextColor, swipedLeftTextColor;
-    private int selectedPosition = -1;
-    protected boolean isOnBind = false;
+    private int selectedPosition = -1, currentOldSelectedPosition = -1;
+    protected int lastAnimatedPosition = -1;
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId, boolean multipleSelectionEnabled) {
         this.mContext = context;
@@ -90,7 +111,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     @Override
     public int getItemViewType(int position) {
-        if(infinteScrollListener!=null && position == getItemCount()-1){
+        if(infiniteScrollEnable && position == getItemCount()-1) {
             return VIEW_TYPE_LOAD;
         }
         T model = viewModels.get(position);
@@ -112,6 +133,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         if (viewGroup instanceof RecyclerView) {
             View view = LayoutInflater.from(viewGroup.getContext()).inflate(getLayoutForType(viewType), viewGroup, false);
             view.setFocusable(true);
+            if(viewType == VIEW_TYPE_LOAD){
+                return getViewHolderForLoader(view);
+            }
             return getViewHolder(view);
         }else {
             throw new RuntimeException("Not bound to RecyclerView");
@@ -120,9 +144,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     @Override
     public void onBindViewHolder(BaseAdapter<T>.ViewHolder holder, int position) {
-        T viewModel = viewModels.get(position);
-        if(getItemViewType(viewModel) != VIEW_TYPE_LOAD) {
-            holder.setIndex(position);
+        holder.setIndex(position);
+        if(getItemViewType(position) != VIEW_TYPE_LOAD) {
+            T viewModel = viewModels.get(position);
             isOnBind = true;
             onBindCustomViewHolder(holder, position, viewModel);
             if (multipleSelectionEnabled && isOneItemSelected()) {
@@ -135,8 +159,79 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
                 bindElementSelected(holder, viewModel, position, isSelected);
             } else {
                 setDeselectedStyle(holder, position);
+                animateViewHolderAtPosition(holder, position);
             }
             isOnBind = false;
+        }else{
+            onBindCustomViewHolderForLoader(holder, position);
+            animateViewHolderAtPosition(holder, position);
+        }
+    }
+
+    protected void animateViewHolderAtPosition(final ViewHolder viewHolder, final int position){
+        boolean selectionShouldHideAnimation = isOnItemSelection && (position == currentOldSelectedPosition || position == selectedPosition);
+        if(animationScrollEnabled && !selectionShouldHideAnimation && !loadingMoreRecords) {
+            if(position > lastAnimatedPosition) {
+                for (Animator anim : getAnimatorsScrollDown(viewHolder.itemView)) {
+                    anim.setDuration(400).start();
+                    anim.setInterpolator(mInterpolator);
+                }
+            }else{
+                for (Animator anim : getAnimatorsScrollUp(viewHolder.itemView)) {
+                    anim.setDuration(400).start();
+                    anim.setInterpolator(mInterpolator);
+                }
+            }
+            /*
+            Animation animation = AnimationUtils.loadAnimation(mContext, getAnimationResource(position));
+            viewHolder.itemView.startAnimation(animation);
+            */
+            lastAnimatedPosition = position;
+        }else{
+            viewHolder.clearAnimation();
+            //viewHolder.itemView.clearAnimation();
+        }
+        checkIfIsOnSelectionEnded(position);
+    }
+
+    protected Animator[] getAnimatorsScrollDown(View view){
+        return new Animator[] {
+                ObjectAnimator.ofFloat(view, "translationY", view.getMeasuredHeight(), 0)
+        };
+    }
+
+    protected Animator[] getAnimatorsScrollUp(View view){
+        return new Animator[] {
+                ObjectAnimator.ofFloat(view, "translationY", -view.getMeasuredHeight(), 0)
+        };
+    }
+
+    protected int getAnimationResource(int position){
+        if(lastAnimatedPosition < 0){
+            return R.anim.up_from_bottom;
+        }
+        if(position >= lastAnimatedPosition)
+            return R.anim.up_from_bottom;
+        return R.anim.down_from_top;
+    }
+
+    public void pauseAnimation(){
+        animationScrollEnabled = false;
+    }
+
+    public void startAnimation(){
+        animationScrollEnabled = true;
+    }
+
+    public void resetAnimation(){
+        lastAnimatedPosition = -1;
+    }
+
+    @Override
+    public void onViewDetachedFromWindow(ViewHolder holder) {
+        super.onViewDetachedFromWindow(holder);
+        if(animationScrollEnabled) {
+            holder.itemView.clearAnimation();
         }
     }
 
@@ -175,6 +270,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         return;
     }
 
+    public ViewHolder getViewHolderForLoader(View view){
+        return new ViewHolder(view);
+    }
+    protected void onBindCustomViewHolderForLoader(ViewHolder holder, int position){
+
+    }
+
     //da sovrascrivere se si vuole utilizzare questa funzionalità
     public boolean isEquals(T model, T modelToCompare){
         return false;
@@ -211,6 +313,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public void toggleSelection(int pos, boolean notify) {
+        if(infiniteScrollEnable && loadingMoreRecords){
+            return;
+        }
         boolean started = isOneItemSelected();
         if (selectedItems.get(pos, false)) {
             selectedItems.delete(pos);
@@ -225,13 +330,17 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
         }
         if(!started && isOneItemSelected()){
+            //inizio della multiselezione
             if(multipleSelectionEvent!=null){
                 multipleSelectionEvent.onStartMultipleSelection();
             }
+            endInfiniteScroll();
         }else if(started && !isOneItemSelected()){
+            //fine della multiselezione
             if(multipleSelectionEvent!=null){
                 multipleSelectionEvent.onStopMultipleSelection();
             }
+            restartInfiniteScroll(false);
         }
         if(notify && !isOnBind)
             notifyItemChanged(pos);
@@ -300,6 +409,14 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         return viewModels.size();
     }
 
+    public int getItemCount(boolean excludeLoading) {
+        int count = getItemCount();
+        if(excludeLoading && infiniteScrollEnable){
+            count--;
+        }
+        return count;
+    }
+
     public void swapData(List<T> newList){
         swapData(newList, false);
     }
@@ -311,24 +428,36 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
         }
         viewModels = newList;
+        if(infiniteScrollEnable && viewModels.size()> 0){
+            viewModels.add(null);
+        }
         notifyDataSetChanged();
         if(mEmptyView!=null)
             mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
         if(onSwapData!=null)
             onSwapData.onSwap(newList);
+        loadingMoreRecords = false;
     }
 
     public void addData(List<T> newList){
         if(viewModels==null){
             viewModels = newList;
         }else {
+            if(infiniteScrollEnable && loadingMoreRecords){
+                viewModels.remove(viewModels.size()-1);
+                lastAnimatedPosition = viewModels.size()-1;
+            }
             viewModels.addAll(newList);
         }
         if(mEmptyView!=null)
             mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
         if(onSwapData!=null)
             onSwapData.onSwap(newList);
+        if(infiniteScrollEnable && viewModels.size()> 0){
+            viewModels.add(null);
+        }
         notifyDataSetChanged();
+        loadingMoreRecords = false;
     }
 
     protected String getCancelButtonText(){
@@ -386,6 +515,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
             @Override
             public boolean isMovementAllowed(int position) {
+                if(infiniteScrollEnable && loadingMoreRecords)
+                    return false;
                 if(multipleSelectionEnabled)
                     return !isOneItemSelected();
                 return true;
@@ -471,8 +602,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         List<T> dataFilter = new ArrayList<>();
         List<T> datTemp = originalViewModels==null ? viewModels : originalViewModels;
         for(T vm : datTemp){
-            if(checkFilter(vm, filter))
-                dataFilter.add(vm);
+            if(vm!=null) {
+                if (checkFilter(vm, filter))
+                    dataFilter.add(vm);
+            }
         }
         swapData(dataFilter, true);
     }
@@ -509,27 +642,78 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.swipedLeftTextColor = swipedLeftTextColor;
     }
 
-    public void enableInfiniteScroll(RecyclerView recyclerView, InfinteScrollListener scrollListener){
-        this.infinteScrollListener = scrollListener;
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(recyclerView.getLayoutManager()) {
-            @Override
-            public int getFooterViewType(int defaultNoFooterViewType) {
-                return VIEW_TYPE_LOAD;
-            }
+    public void endInfiniteScroll() {
+        this.infiniteScrollEnable = false;
+        if(viewModels.get(viewModels.size()-1) == null){
+            viewModels.remove(viewModels.size()-1);
+        }
+    }
+    public void restartInfiniteScroll(boolean resetPage) {
+        this.infiniteScrollEnable = true;
+        if(viewModels.get(viewModels.size()-1) != null){
+            viewModels.add(null);
+            notifyDataSetChanged();
+        }
+        if(resetPage)
+            resetInfiniteScroll();
+    }
 
+    public void resetInfiniteScroll(){
+        if(endlessRecyclerViewScrollListener!=null)
+            this.endlessRecyclerViewScrollListener.reset();
+    }
+
+    public void enableInfiniteScroll(RecyclerView recyclerView, InfinteScrollListener scrollListener){
+        this.infiniteScrollEnable = true;
+        this.infinteScrollListener = scrollListener;
+        endlessRecyclerViewScrollListener = new EndlessRecyclerViewScrollListener(recyclerView.getLayoutManager()) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if(infinteScrollListener!=null){
+                if(infiniteScrollEnable && !loadingMoreRecords && infinteScrollListener!=null){
+                    loadingMoreRecords = true;
                     infinteScrollListener.onLoadMore(page, totalItemsCount);
                 }
             }
-        });
+        };
+        recyclerView.addOnScrollListener(endlessRecyclerViewScrollListener);
+    }
+
+    public void selectItem(int adapterPosition){
+        isOnItemSelection = true;
+        currentOldSelectedPosition = selectedPosition;
+        selectedPosition = adapterPosition;
+        T viewModel = viewModels.get(adapterPosition);
+        if(mClickHandler!=null)
+            mClickHandler.onClick(viewModel);
+        notifyItemChanged(adapterPosition);
+        if(currentOldSelectedPosition!=-1)
+            notifyItemChanged(currentOldSelectedPosition);
+    }
+
+    private boolean[] selection = new boolean[2];
+    private void checkIfIsOnSelectionEnded(int position){
+        if(isOnItemSelection){
+            if(selectedPosition == position){
+                selection[0] = true;
+            }
+            if(currentOldSelectedPosition == position){
+                currentOldSelectedPosition = -1;
+                selection[1] = true;
+            }
+            boolean done = true;
+            for (boolean b : selection){
+                done &= b;
+            }
+            if(done){
+                isOnItemSelection = false;
+                selection[0] = false;
+                selection[1] = false;
+            }
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
-
         public int index;
-
         public ViewHolder(View view){
             super(view);
             view.setOnClickListener(this);
@@ -547,15 +731,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             if(multipleSelectionEnabled && isOneItemSelected()){
                 toggleSelection(index);
             }
-            else if(mClickHandler!=null) {
-                int oldSelected = selectedPosition;
-                int adapterPosition = getAdapterPosition();
-                selectedPosition = adapterPosition;
-                T viewModel = viewModels.get(adapterPosition);
-                mClickHandler.onClick(viewModel);
-                notifyItemChanged(adapterPosition);
-                if(oldSelected!=-1)
-                    notifyItemChanged(oldSelected);
+            else {
+                selectItem(getAdapterPosition());
             }
         }
 
@@ -563,6 +740,21 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         public boolean onLongClick(View v) {
             toggleSelection(index);
             return false;
+        }
+
+        public void clearAnimation() {
+            View v = itemView;
+            ViewCompat.setAlpha(v, 1);
+            ViewCompat.setScaleY(v, 1);
+            ViewCompat.setScaleX(v, 1);
+            ViewCompat.setTranslationY(v, 0);
+            ViewCompat.setTranslationX(v, 0);
+            ViewCompat.setRotation(v, 0);
+            ViewCompat.setRotationY(v, 0);
+            ViewCompat.setRotationX(v, 0);
+            ViewCompat.setPivotY(v, v.getMeasuredHeight() / 2);
+            ViewCompat.setPivotX(v, v.getMeasuredWidth() / 2);
+            ViewCompat.animate(v).setInterpolator(null).setStartDelay(0);
         }
 
         public void setIndex(int index) {

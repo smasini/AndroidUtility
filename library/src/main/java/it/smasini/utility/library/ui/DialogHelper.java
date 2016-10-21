@@ -29,9 +29,9 @@ public class DialogHelper {
     public static void showDialog(Context context){
         if(progressDialog == null){
             if(dialogStyle==-1){
-                progressDialogDeterminate = new ProgressDialog(context);
+                progressDialog = new ProgressDialog(context);
             }else{
-                progressDialogDeterminate = new ProgressDialog(context, dialogStyle);
+                progressDialog = new ProgressDialog(context, dialogStyle);
             }
         }
         progressDialog.setMessage(context.getString(R.string.label_progress_dialog_task));

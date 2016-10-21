@@ -13,7 +13,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
 
     // The minimum amount of items to have below your current scroll position
     // before loading more.
-    private int visibleThreshold = 5;
+    private int visibleThreshold = 2;
     // The current offset index of data you have loaded
     private int currentPage = 0;
 
@@ -25,8 +25,8 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     private int startingPageIndex = 0;
 
     // Sets the  footerViewType
-    private int defaultNoFooterViewType = -1;
-    private int footerViewType = -1;
+   // private int defaultNoFooterViewType = -1;
+   // private int footerViewType = -1;
 
 
     private String mTag = "scroll-listener";
@@ -63,7 +63,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
 
     //init from  self-define
     private void init() {
-        footerViewType = getFooterViewType(defaultNoFooterViewType);
+      //  footerViewType = getFooterViewType(defaultNoFooterViewType);
         startingPageIndex = getStartingPageIndex();
 
         int threshold = getVisibleThreshold();
@@ -83,40 +83,36 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         if (dy <= 0) return;
 //        Log.i(mTag, "onScrolled-------dy:" + dy);
 
-        RecyclerView.Adapter adapter = view.getAdapter();
+        BaseAdapter adapter = (BaseAdapter) view.getAdapter();
         int totalItemCount = adapter.getItemCount();
 
         int lastVisibleItemPosition = getLastVisibleItemPosition();
 
+        if (loading && (totalItemCount > previousTotalItemCount)) {
+            loading = false;
+            previousTotalItemCount = totalItemCount;
+        }
+
         boolean isAllowLoadMore = (lastVisibleItemPosition + visibleThreshold) > totalItemCount;
-
         if (isAllowLoadMore) {
-
-            if (isUseFooterView()) {
-                if (!isFooterView(adapter)) {
-
-                    if (totalItemCount < previousTotalItemCount) {//swiprefresh reload result to change listsize ,reset pageindex
-                        this.currentPage = this.startingPageIndex;
+            /*if (!isFooterView(adapter)) {
+                if (totalItemCount < previousTotalItemCount) {//swiprefresh reload result to change listsize ,reset pageindex
+                    this.currentPage = this.startingPageIndex;
 //                            Log.i(mTag, "****totalItemCount:" + totalItemCount + ",previousTotalItemCount:" + previousTotalItemCount + ",currentpage=startingPageIndex");
-                    } else if (totalItemCount == previousTotalItemCount) {//if load failure or load empty data , we rollback  pageindex
-                        currentPage = currentPage == startingPageIndex ? startingPageIndex : --currentPage;
+                } else if (totalItemCount == previousTotalItemCount) {//if load failure or load empty data , we rollback  pageindex
+                    currentPage = currentPage == startingPageIndex ? startingPageIndex : --currentPage;
 //                            Log.i(mTag, "!!!!currentpage:" + currentPage);
-                    }
-
-                    loading = false;
                 }
-            } else {
-                if (totalItemCount > previousTotalItemCount) loading = false;
-            }
+                loading = false;
+            }*/
 
             if (!loading) {
-
                 // If it isn’t currently loading, we check to see if we have breached
                 // the visibleThreshold and need to reload more data.
                 // If we do need to reload some more data, we execute onLoadMore to fetch the data.
                 // threshold should reflect how many total columns there are too
 
-                previousTotalItemCount = totalItemCount;
+                //previousTotalItemCount = totalItemCount;
                 currentPage++;
                 onLoadMore(currentPage, totalItemCount);
                 loading = true;
@@ -129,9 +125,8 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     @Override
     public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
         super.onScrollStateChanged(recyclerView, newState);
-
     }
-
+/*
 
     public boolean isUseFooterView() {
         boolean isUse = footerViewType != defaultNoFooterViewType;
@@ -140,7 +135,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
     }
 
 
-    public boolean isFooterView(RecyclerView.Adapter padapter) {
+    public boolean isFooterView(BaseAdapter padapter) {
 
         boolean isFooterView = false;
         int ptotalItemCount = padapter.getItemCount();
@@ -156,7 +151,7 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
 //        Log.i(mTag, "isFooterView:" + isFooterView);
 
         return isFooterView;
-    }
+    }*/
 
     private int getLastVisibleItemPosition() {
         int lastVisibleItemPosition = 0;
@@ -171,7 +166,6 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         return lastVisibleItemPosition;
     }
 
-
     public int getLastVisibleItem(int[] lastVisibleItemPositions) {
         int maxSize = 0;
         for (int i = 0; i < lastVisibleItemPositions.length; i++) {
@@ -184,10 +178,15 @@ public abstract class EndlessRecyclerViewScrollListener extends RecyclerView.OnS
         return maxSize;
     }
 
+    public void reset(){
+        this.currentPage = this.startingPageIndex;
+        this.previousTotalItemCount = 0;
+        this.loading = true;
+    }
 
     // set FooterView type
     // if don't use footview loadmore  default: -1
-    public abstract int getFooterViewType(int defaultNoFooterViewType);
+    //public abstract int getFooterViewType(int defaultNoFooterViewType);
 
     // Defines the process for actually loading more data based on page
     public abstract void onLoadMore(int page, int totalItemsCount);
