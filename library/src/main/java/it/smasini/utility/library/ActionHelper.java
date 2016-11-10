@@ -1,12 +1,17 @@
 package it.smasini.utility.library;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+
+import it.smasini.utility.library.ui.DialogHelper;
 
 /**
  * Created by Simone Masini on 30/06/2016
@@ -27,6 +32,15 @@ public class ActionHelper {
         shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
         activity.startActivity(shareIntent);
     }
+
+    public static void openStorePage(Activity activity, String appPackageName){
+        try {
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+        } catch (android.content.ActivityNotFoundException anfe) {
+            activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+        }
+    }
+
 
     public static void openUrl(Activity activity, String url){
         Intent i = new Intent(Intent.ACTION_VIEW);
@@ -97,4 +111,33 @@ public class ActionHelper {
         }
         return "";
     }
+
+    public static void openDBInSqliteDubugger(Activity activity,String databasepath, String directory){
+        openDBInSqliteDubugger(activity, databasepath, directory, null);
+    }
+
+    public static void openDBInSqliteDubugger(final Activity activity, String databasepath, String directory, String sqlCommand){
+        String filename = "copy.db";
+        if(FileUtility.copyFile(databasepath, directory, filename)){
+            Intent intent = new Intent(Intent.ACTION_EDIT);
+            intent.setData(Uri.parse("sqlite:" + directory + "/" + filename));
+            if(sqlCommand!=null && !sqlCommand.equals("")){
+                intent.putExtra("sql", sqlCommand);
+            }
+            try {
+                activity.startActivity(intent);
+            }
+            catch (ActivityNotFoundException e){
+                DialogHelper.warning(activity, "SQLite Debugger non trovata", "Sembra che SQLite Debugger non sia installata, vuoi accedere alla scheda dello store?", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        openStorePage(activity, "oliver.ehrenmueller.dbadmin");
+                    }
+                });
+            }
+        }else{
+            Log.e("Error", "Error");
+        }
+    }
+
 }

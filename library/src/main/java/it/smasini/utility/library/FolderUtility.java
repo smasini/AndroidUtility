@@ -23,18 +23,21 @@ public class FolderUtility {
 
 
     public static void askPermissions(Activity activity){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE }, 0);
-            }
-        }
+        askPermissions(activity, null);
+    }
+
+    public static void askPermissions(Activity activity, PermissionHelper.PermissionListener permissionListener){
+        PermissionHelper ph = new PermissionHelper(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, permissionListener);
+        ph.askPermissions();
     }
 
     public static boolean havePermissions(Activity activity){
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            return ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED && ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED;
-        }
-        return true;
+        return havePermissions(activity, null);
+    }
+
+    public static boolean havePermissions(Activity activity, PermissionHelper.PermissionListener permissionListener){
+        PermissionHelper ph = new PermissionHelper(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, permissionListener);
+        return ph.havePermissions();
     }
 
     /**
@@ -60,11 +63,6 @@ public class FolderUtility {
         return path;
     }
 
-    public static boolean existFile(String path){
-        File file = new File(path);
-        return file.exists();
-    }
-
     /**
      * Create a directory
      * @param path of directory to create
@@ -78,52 +76,22 @@ public class FolderUtility {
         return false;
     }
 
-    public static String getExtension(String name){
-        String[] s = name.split("\\.");
-        if(s.length > 0) {
-            return s[s.length - 1].toLowerCase();
-        }
-        return "";
-    }
-
-    /**
-     *
-     * @param srcPath path file to copy
-     * @param dstPath directory of destination
-     * @param newFilename filename with extension of new file
-     * @return true if the file is been copied
-     */
-    public static boolean copyFile(String srcPath, String dstPath, String newFilename) {
-        File src = new File(srcPath);
-        createDirectoty(dstPath);
-        File dst = new File(dstPath + "/" + newFilename);
-        if(src.getAbsolutePath().equals(dst.getAbsolutePath())){
-            return true;
-        }else{
-            try {
-                InputStream is = new FileInputStream(src);
-                OutputStream os = new FileOutputStream(dst);
-                byte[] buff = new byte[1024];
-                int len;
-                while ((len = is.read(buff)) > 0) {
-                    os.write(buff, 0, len);
-                }
-                is.close();
-                os.close();
-            }catch (IOException e){
-                Log.e("Error copyFile", e.getMessage());
-                return false;
-            }
-        }
-        return true;
-    }
-
     /**
      * delete directory with content
      * @param directoryPath to delete
      * @return true if the directory is deleted
      */
-    private static boolean deleteDirectory(String directoryPath){
+    public static boolean deleteDirectory(String directoryPath){
+        return deleteDirectory(directoryPath, true);
+    }
+
+    /**
+     * delete content of a directory and choice to include the directory
+     * @param directoryPath to delete
+     * @param includeRoot for include the root directory
+     * @return true if the directory is deleted
+     */
+    public static boolean deleteDirectory(String directoryPath, boolean includeRoot){
         File dir = new File(directoryPath);
         if (dir.exists() && dir.isDirectory()) {
             String[] children = dir.list();
@@ -132,23 +100,13 @@ public class FolderUtility {
                 if(file.isDirectory()){
                     deleteDirectory(file.getAbsolutePath());
                 }else{
-                    deleteFile(file.getAbsolutePath());
+                    FileUtility.deleteFile(file.getAbsolutePath());
                 }
             }
-            return dir.delete();
-        }
-        return false;
-    }
-
-    /**
-     *
-     * @param filepath to delete
-     * @return true if is deleted
-     */
-    public static boolean deleteFile(String filepath){
-        File file = new File(filepath);
-        if(file.exists() && !file.isDirectory()){
-            return file.delete();
+            if(includeRoot)
+                return dir.delete();
+            else
+                return true;
         }
         return false;
     }
