@@ -21,6 +21,7 @@ public class SpinnerBaseAdapter extends ArrayAdapter<SpinnerItem> {
     private int itemResource, dropdownResource;
     private Activity context;
     private List<SpinnerItem> items;
+    private CustomSpinnerBinding customSpinnerBinding;
 
     public SpinnerBaseAdapter(Activity context, int itemResource, int dropdownResource) {
         super(context, itemResource);
@@ -39,8 +40,12 @@ public class SpinnerBaseAdapter extends ArrayAdapter<SpinnerItem> {
 
         TextView textView = (TextView) row.findViewById(android.R.id.text1);
         SpinnerItem item = getItem(position);
+        if(item!=null)
         textView.setText(item.getLabel());
 
+        if(customSpinnerBinding!=null){
+            row = customSpinnerBinding.bindView(row, item);
+        }
         return row;
     }
 
@@ -51,7 +56,11 @@ public class SpinnerBaseAdapter extends ArrayAdapter<SpinnerItem> {
 
         CheckedTextView checkedTextView = (CheckedTextView) row.findViewById(android.R.id.text1);
         SpinnerItem item = getItem(position);
+        if(item!=null)
         checkedTextView.setText(item.getLabel());
+        if(customSpinnerBinding!=null){
+            row = customSpinnerBinding.bindDropdownView(row, item);
+        }
         return row;
     }
 
@@ -76,7 +85,16 @@ public class SpinnerBaseAdapter extends ArrayAdapter<SpinnerItem> {
         items.clear();
     }
 
+    public void setCustomSpinnerBinding(CustomSpinnerBinding customSpinnerBinding) {
+        this.customSpinnerBinding = customSpinnerBinding;
+    }
+
     public List<SpinnerItem> getItems() {
         return items;
+    }
+
+    public interface CustomSpinnerBinding{
+        View bindView(View rootView, SpinnerItem item);
+        View bindDropdownView(View rootView, SpinnerItem item);
     }
 }

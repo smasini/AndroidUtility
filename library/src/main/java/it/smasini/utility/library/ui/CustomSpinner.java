@@ -110,4 +110,11 @@ public class CustomSpinner extends Spinner {
         }
         setSelection(-1);
     }
+
+    public void setCustomSpinnerBinding(SpinnerBaseAdapter.CustomSpinnerBinding customSpinnerBinding) {
+        if(adapter!=null){
+            adapter.setCustomSpinnerBinding(customSpinnerBinding);
+        }
+    }
+
 }
