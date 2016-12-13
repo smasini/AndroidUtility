@@ -644,15 +644,19 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public void endInfiniteScroll() {
         this.infiniteScrollEnable = false;
-        if(viewModels.get(viewModels.size()-1) == null){
-            viewModels.remove(viewModels.size()-1);
+        if(viewModels.size() > 0) {
+            if (viewModels.get(viewModels.size() - 1) == null) {
+                viewModels.remove(viewModels.size() - 1);
+            }
         }
     }
     public void restartInfiniteScroll(boolean resetPage) {
         this.infiniteScrollEnable = true;
-        if(viewModels.get(viewModels.size()-1) != null){
-            viewModels.add(null);
-            notifyDataSetChanged();
+        if(viewModels.size() > 0) {
+            if (viewModels.get(viewModels.size() - 1) != null) {
+                viewModels.add(null);
+                notifyDataSetChanged();
+            }
         }
         if(resetPage)
             resetInfiniteScroll();
