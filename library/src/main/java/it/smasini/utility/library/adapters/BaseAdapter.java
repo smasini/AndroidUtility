@@ -300,6 +300,12 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         holder.changeBackground(highlightedColor);
     }
 
+    public void clearSelectedPosition(){
+        int pos = selectedPosition;
+        selectedPosition = -1;
+        notifyItemChanged(pos);
+    }
+
     private void setDeselectedStyle(BaseAdapter.ViewHolder holder, int position){
         if(position == selectedPosition){
             holder.changeBackground(selectedColor);
