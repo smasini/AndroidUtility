@@ -17,16 +17,18 @@ import android.util.Log;
  */
 public class Geolocation implements LocationListener {
 
-    public static double latitude;
-    public static double longitude;
+    public static double latitude = 0;
+    public static double longitude = 0;
 
     private static final String TAG = "GEOLOC";
     private static final float DISTANCE_BETWEEN_LOCATION = 0;
     private static final long TIME_BETWEEN_LOCATION = 1000 * 30;//time in millisec between update position
 
     private LocationManager locMan;
+    private GeolocationListener geolocationListener;
     private static Geolocation geolocation;
     private Context context;
+    private boolean stopLocationAfterFoundOne = true;
 
     private Geolocation(Context context) {
         locMan = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
@@ -73,9 +75,16 @@ public class Geolocation implements LocationListener {
     public void startLocation(){
         if(!checkPermission())
             return;
-        locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,TIME_BETWEEN_LOCATION,DISTANCE_BETWEEN_LOCATION,this);
+        if(locMan.getAllProviders().contains(LocationManager.NETWORK_PROVIDER) && locMan.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,TIME_BETWEEN_LOCATION,DISTANCE_BETWEEN_LOCATION,this);
+        }
+        if(locMan.getAllProviders().contains(LocationManager.GPS_PROVIDER) && locMan.isProviderEnabled(LocationManager.GPS_PROVIDER)){
+            locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER,TIME_BETWEEN_LOCATION,DISTANCE_BETWEEN_LOCATION,this);
+        }
+        //locMan.requestLocationUpdates(TIME_BETWEEN_LOCATION, DISTANCE_BETWEEN_LOCATION, new Criteria(), this, null);
+        /*locMan.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,TIME_BETWEEN_LOCATION,DISTANCE_BETWEEN_LOCATION,this);
         locMan.requestLocationUpdates(LocationManager.GPS_PROVIDER,TIME_BETWEEN_LOCATION,DISTANCE_BETWEEN_LOCATION,this);
-        locMan.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, TIME_BETWEEN_LOCATION, DISTANCE_BETWEEN_LOCATION, this);
+        locMan.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER, TIME_BETWEEN_LOCATION, DISTANCE_BETWEEN_LOCATION, this);*/
     }
 
     public void stopLocation(){
@@ -105,11 +114,30 @@ public class Geolocation implements LocationListener {
         if (loc == null)
             return;
         changeLocation(loc);
-        stopLocation();
+        if(geolocationListener!=null)
+            geolocationListener.onLocationFound(latitude, longitude);
+        if(stopLocationAfterFoundOne)
+            stopLocation();
     }
 
     public void changeLocation(Location loc){
         latitude = loc.getLatitude();
         longitude = loc.getLongitude();
+    }
+
+    public void setStopLocationAfterFoundOne(boolean stopLocationAfterFoundOne) {
+        this.stopLocationAfterFoundOne = stopLocationAfterFoundOne;
+    }
+
+    public boolean isStopLocationAfterFoundOne() {
+        return stopLocationAfterFoundOne;
+    }
+
+    public void setGeolocationListener(GeolocationListener geolocationListener) {
+        this.geolocationListener = geolocationListener;
+    }
+
+    public interface GeolocationListener{
+         void onLocationFound(double latitude, double longitude);
     }
 }

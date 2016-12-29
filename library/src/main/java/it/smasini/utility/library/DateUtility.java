@@ -4,6 +4,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Simone Masini on 30/06/2016
@@ -58,4 +59,24 @@ public class DateUtility {
         long diffDays = diffTime / (1000 * 60 * 60 * 24);
         return (int)diffDays;
     }
+
+    public static long differenceSeconds(Date startDate, Date endDate){
+        long diffInMs = endDate.getTime() - startDate.getTime();
+        return TimeUnit.MILLISECONDS.toSeconds(diffInMs);
+    }
+
+    public static Calendar convertDate(Date date){
+        Calendar calendar = Calendar.getInstance();
+        if(date == null)
+            return calendar;
+        calendar.setTime(date);
+        return calendar;
+    }
+
+    public static Date convertCalendar(Calendar calendar){
+        if(calendar == null)
+            return new Date();
+        return calendar.getTime();
+    }
+
 }
