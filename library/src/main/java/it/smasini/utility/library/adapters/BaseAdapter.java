@@ -303,7 +303,8 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     public void clearSelectedPosition(){
         int pos = selectedPosition;
         selectedPosition = -1;
-        notifyItemChanged(pos);
+        if(pos!=-1)
+            notifyItemChanged(pos);
     }
 
     private void setDeselectedStyle(BaseAdapter.ViewHolder holder, int position){
