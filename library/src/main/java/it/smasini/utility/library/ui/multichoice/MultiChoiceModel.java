@@ -5,7 +5,7 @@ package it.smasini.utility.library.ui.multichoice;
  */
 public class MultiChoiceModel {
 
-    private int id;
+    private String id;
     private String label;
     private boolean isSelected, isEnabled;
 
@@ -13,17 +13,17 @@ public class MultiChoiceModel {
         this.isEnabled = true;
     }
 
-    public MultiChoiceModel(int id, String label) {
+    public MultiChoiceModel(String id, String label) {
         this.id = id;
         this.label = label;
         this.isEnabled = true;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
