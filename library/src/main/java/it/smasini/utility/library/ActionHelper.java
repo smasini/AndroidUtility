@@ -66,6 +66,16 @@ public class ActionHelper {
         openUrl(activity, url);
     }
 
+    public static void intentFile(Activity activity, String path){
+        String extension = FileUtility.getExtension(path);
+        String mime = FileUtility.getMimeTypeFromExtension(extension);
+        try {
+            intentFile(activity, path, mime);
+        }catch (Exception e){
+            DialogHelper.alert(activity, activity.getString(R.string.open_file_error_title), activity.getString(R.string.open_file_error_msg) + extension);
+        }
+    }
+
     public static void intentFile(Activity activity, String path, String mime){
         File file = new File(path);
         Intent intent = new Intent(Intent.ACTION_VIEW);

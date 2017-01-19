@@ -15,4 +15,6 @@
     <string name="lorem_ipsum_small" translatable="false">Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua</string>
     <string name="lorem_ipsum_medium" translatable="false">Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.</string>
     <string name="pulisci_data">Pulisci</string>
+    <string name="open_file_error_title">Impossibile aprire il file</string>
+    <string name="open_file_error_msg">"Non è presente nessuna applicazione in grado di aprire file di tipo: "</string>
 </resources>
