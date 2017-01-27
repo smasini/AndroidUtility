@@ -296,7 +296,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         return viewModels.get(position);
     }
 
-    private void setSelectedStyle(BaseAdapter.ViewHolder holder){
+    protected void setSelectedStyle(BaseAdapter.ViewHolder holder){
         holder.changeBackground(highlightedColor);
     }
 
@@ -307,7 +307,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             notifyItemChanged(pos);
     }
 
-    private void setDeselectedStyle(BaseAdapter.ViewHolder holder, int position){
+    protected void setDeselectedStyle(BaseAdapter<T>.ViewHolder holder, int position){
         if(position == selectedPosition){
             holder.changeBackground(selectedColor);
         }else {
