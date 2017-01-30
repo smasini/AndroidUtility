@@ -45,10 +45,11 @@ public class ColorUtility {
     }
 
     public static ColorStateList getColorSelector(int res, Context context){
+        context.getResources().getColorStateList(res);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return context.getColorStateList(res);
         }else{
-            return context.getResources().getColorStateList(res, context.getTheme());
+            return context.getResources().getColorStateList(res);
         }
     }
 
