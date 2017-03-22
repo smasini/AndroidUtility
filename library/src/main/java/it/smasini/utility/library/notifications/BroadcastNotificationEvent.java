@@ -65,11 +65,11 @@ public class BroadcastNotificationEvent<T> {
         broadcastEventListener = null;
     }
 
-    public void sendEvent(Activity activity){
-        sendEvent(activity, null);
+    public void sendEvent(Context context){
+        sendEvent(context, null);
     }
 
-    public void sendEvent(Activity activity, T obj){
+    public void sendEvent(Context context, T obj){
         Intent intent = new Intent();
         if(broadcastEventCreator!=null){
             intent = broadcastEventCreator.onIntentEventCreated(intent, obj);
@@ -77,7 +77,7 @@ public class BroadcastNotificationEvent<T> {
         intent.setAction(filter);
         eventSendWaiting = true;
         Log.d("EVENT_SEND", filter);
-        activity.sendBroadcast(intent);
+        context.sendBroadcast(intent);
     }
 
     public boolean isEventSendWaiting() {
