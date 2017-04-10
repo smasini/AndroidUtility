@@ -4,20 +4,14 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.ViewCompat;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.SparseBooleanArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 
@@ -46,7 +40,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected List<T> viewModels = new ArrayList<>();
     private List<T> originalViewModels;
 
-    private boolean multipleSelectionEnabled, infiniteScrollEnable;
+    private boolean multipleSelectionEnabled, infiniteScrollEnable, infiniteScrollEnded;
     protected boolean loadingMoreRecords = false;
     protected boolean animationScrollEnabled = false;
     protected boolean isOnItemSelection = false;
@@ -58,7 +52,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected OnSwapData<T> onSwapData;
     private OnMultipleSelectionEvent<T> multipleSelectionEvent;
     private OnGestureEvent<T> gestureEvent;
-    private InfinteScrollListener infinteScrollListener;
+    private InfiniteScrollListener infiniteScrollListener;
 
     private SparseBooleanArray selectedItems;
     protected int highlightedColor, defaultColor, selectedColor, swipedRightColor, swipedLeftColor, swipedRightTextColor, swipedLeftTextColor;
@@ -341,13 +335,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             if(multipleSelectionEvent!=null){
                 multipleSelectionEvent.onStartMultipleSelection();
             }
-            endInfiniteScroll();
+            pauseInfiniteScroll();
         }else if(started && !isOneItemSelected()){
             //fine della multiselezione
-            if(multipleSelectionEvent!=null){
-                multipleSelectionEvent.onStopMultipleSelection();
-            }
-            restartInfiniteScroll(false);
+            endMultiSelection();
         }
         if(notify && !isOnBind)
             notifyItemChanged(pos);
@@ -356,9 +347,14 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     public void clearSelections() {
         selectedItems.clear();
         notifyDataSetChanged();
+        endMultiSelection();
+    }
+
+    private void endMultiSelection(){
         if(multipleSelectionEvent!=null){
             multipleSelectionEvent.onStopMultipleSelection();
         }
+        restartInfiniteScroll(false);
     }
 
     public int getSelectedItemsCount() {
@@ -650,6 +646,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public void endInfiniteScroll() {
+        pauseInfiniteScroll();
+        this.infiniteScrollEnded = true;
+    }
+
+    public void pauseInfiniteScroll() {
         this.infiniteScrollEnable = false;
         if(viewModels.size() > 0) {
             if (viewModels.get(viewModels.size() - 1) == null) {
@@ -657,7 +658,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             }
         }
     }
+
     public void restartInfiniteScroll(boolean resetPage) {
+        if(this.infiniteScrollEnded)
+            return;
         this.infiniteScrollEnable = true;
         if(viewModels.size() > 0) {
             if (viewModels.get(viewModels.size() - 1) != null) {
@@ -669,20 +673,30 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             resetInfiniteScroll();
     }
 
+    public void restartOrResetInfiniteScroll(){
+        if(infiniteScrollEnded)
+            restartInfiniteScroll(true);
+        else
+            resetInfiniteScroll();
+        infiniteScrollEnded = false;
+    }
+
     public void resetInfiniteScroll(){
+        this.infiniteScrollEnded = false;
         if(endlessRecyclerViewScrollListener!=null)
             this.endlessRecyclerViewScrollListener.reset();
     }
 
-    public void enableInfiniteScroll(RecyclerView recyclerView, InfinteScrollListener scrollListener){
+    public void enableInfiniteScroll(RecyclerView recyclerView, InfiniteScrollListener scrollListener){
         this.infiniteScrollEnable = true;
-        this.infinteScrollListener = scrollListener;
+        this.infiniteScrollEnded = false;
+        this.infiniteScrollListener = scrollListener;
         endlessRecyclerViewScrollListener = new EndlessRecyclerViewScrollListener(recyclerView.getLayoutManager()) {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
-                if(infiniteScrollEnable && !loadingMoreRecords && infinteScrollListener!=null){
+                if(infiniteScrollEnable && !loadingMoreRecords && infiniteScrollListener !=null){
                     loadingMoreRecords = true;
-                    infinteScrollListener.onLoadMore(page, totalItemsCount);
+                    infiniteScrollListener.onLoadMore(page, totalItemsCount);
                 }
             }
         };
@@ -796,7 +810,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         void moved(T viewModel, int newPosition, int oldPosition);
     }
 
-    public interface InfinteScrollListener{
+    public interface InfiniteScrollListener{
         void onLoadMore(int page, int totalItemsCount);
     }
 
