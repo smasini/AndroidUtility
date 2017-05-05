@@ -165,7 +165,7 @@ public class FileUtility {
             case "tif":
                 return "image/tiff";
             case "xml":
-                return "application/xml";
+                return "text/xml";
             case "png":
                 return "image/png";
             case "mpeg":
