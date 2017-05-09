@@ -170,6 +170,15 @@ public class FileUtility {
                 return "image/png";
             case "mpeg":
                 return "video/mpeg";
+            case "p7a":
+                return "application/x-pkcs7-signature";
+            case "p7c":
+            case "p7m":
+                return "application/pkcs7-mime";
+            case "p7r":
+                return "application/x-pkcs7-certreqresp";
+            case "p7s":
+                return "application/pkcs7-signature";
             case "txt":
             case "text":
             case "log":
