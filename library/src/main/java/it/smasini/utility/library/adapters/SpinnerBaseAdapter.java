@@ -85,6 +85,14 @@ public class SpinnerBaseAdapter extends ArrayAdapter<SpinnerItem> {
         items.clear();
     }
 
+    public void setDropdownResource(int dropdownResource) {
+        this.dropdownResource = dropdownResource;
+    }
+
+    public void setItemResource(int itemResource) {
+        this.itemResource = itemResource;
+    }
+
     public void setCustomSpinnerBinding(CustomSpinnerBinding customSpinnerBinding) {
         this.customSpinnerBinding = customSpinnerBinding;
     }
