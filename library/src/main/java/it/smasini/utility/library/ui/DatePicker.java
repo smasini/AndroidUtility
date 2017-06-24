@@ -169,6 +169,15 @@ public class DatePicker extends EditText implements DatePickerDialog.OnDateSetLi
         setText(format.format(currentDate));
     }
 
+    public void setCurrentDate(String date){
+        SimpleDateFormat format = new SimpleDateFormat(dateFormat, getResources().getConfiguration().locale);
+        try {
+            setCurrentDate(format.parse(date));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
     public String getSelectedDate(){
         SimpleDateFormat format = new SimpleDateFormat(dateFormat, getResources().getConfiguration().locale);
         return format.format(currentDate);

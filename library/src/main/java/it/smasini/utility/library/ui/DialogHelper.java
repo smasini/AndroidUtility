@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -225,4 +226,32 @@ public class DialogHelper {
         dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         dialog.show();
     }
+
+    public static void warningCustomView(Context context, String title, String message, View customView, DialogInterface.OnClickListener positiveButton){
+        AlertDialog.Builder builder;
+        if(alertDialogStyle == -1){
+            builder = new AlertDialog.Builder(context);
+        }else {
+            builder = new AlertDialog.Builder(context, alertDialogStyle);
+        }
+        if(title!=null)
+            builder.setTitle(title);
+        if(message!=null)
+            builder.setMessage(message);
+
+        builder.setView(customView);
+
+
+        builder.setPositiveButton(context.getString(R.string.label_ok), positiveButton);
+        builder.setNegativeButton(context.getString(R.string.label_annulla), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        dialog.show();
+    }
+
 }

@@ -4,12 +4,16 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.List;
 
 import it.smasini.utility.library.ui.DialogHelper;
 
@@ -66,13 +70,41 @@ public class ActionHelper {
         openUrl(activity, url);
     }
 
+    public static void intentFile(Activity activity, String path, String applicationId){
+        String extension = FileUtility.getExtension(path);
+        String mime = FileUtility.getMimeTypeFromExtension(extension);
+        File file = new File(path);
+        Uri uri = FileProvider.getUriForFile(activity, applicationId + ".provider", file);
+        try {
+            intentFile(activity, uri, mime);
+        }catch (Exception e){
+            DialogHelper.alert(activity, activity.getString(R.string.open_file_error_title), activity.getString(R.string.open_file_error_msg) + extension);
+        }
+    }
+
+    public static void intentFile(Activity activity, Uri uri, String mime){
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setDataAndType(uri, mime);
+
+        //non so perchè ma senza questi il file provider non funziona e i file non esistono
+        List<ResolveInfo> resInfoList = activity.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+        for (ResolveInfo resolveInfo : resInfoList) {
+            String packageName = resolveInfo.activityInfo.packageName;
+            activity.grantUriPermission(packageName, uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        }
+
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+        activity.startActivity(intent);
+    }
+
+    /*
     public static void intentFile(Activity activity, String path, String mime){
         File file = new File(path);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(Uri.fromFile(file), mime);
         intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         activity.startActivity(intent);
-    }
+    }*/
 
     public static void intentChoiceFile(Activity activity, int requestCode) {
         intentChoiceFile(activity, "*/*", requestCode);

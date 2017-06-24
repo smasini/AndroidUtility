@@ -3,6 +3,7 @@ package it.smasini.utility.library.graphics;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.TypedValue;
@@ -40,6 +41,15 @@ public class ColorUtility {
             return context.getColor(res);
         }else{
             return context.getResources().getColor(res);
+        }
+    }
+
+    public static ColorStateList getColorSelector(int res, Context context){
+        context.getResources().getColorStateList(res);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            return context.getColorStateList(res);
+        }else{
+            return context.getResources().getColorStateList(res);
         }
     }
 

@@ -33,9 +33,8 @@ public class SHA1 {
         String sha = "";
         try {
             sha = SHA1(str);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
+        }
+        catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
         return sha;
