@@ -95,12 +95,14 @@ public class FolderUtility {
         File dir = new File(directoryPath);
         if (dir.exists() && dir.isDirectory()) {
             String[] children = dir.list();
-            for (String child : children) {
-                File file = new File(dir, child);
-                if(file.isDirectory()){
-                    deleteDirectory(file.getAbsolutePath());
-                }else{
-                    FileUtility.deleteFile(file.getAbsolutePath());
+            if(children!=null) {
+                for (String child : children) {
+                    File file = new File(dir, child);
+                    if (file.isDirectory()) {
+                        deleteDirectory(file.getAbsolutePath());
+                    } else {
+                        FileUtility.deleteFile(file.getAbsolutePath());
+                    }
                 }
             }
             if(includeRoot)
