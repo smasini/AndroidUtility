@@ -15,6 +15,22 @@ import java.util.Locale;
  */
 public class GeolocationUtility {
 
+    public static Address getAddresFromLatLng(Context context, double latitude, double longitude){
+        Geocoder geocoder;
+        List<Address> addresses;
+        geocoder = new Geocoder(context, Locale.getDefault());
+
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+            if(addresses!=null && addresses.size()>0) {
+                return addresses.get(0);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static void startLocationAddress(String address, final Context context, final CallbackLocationFromAddressFound callbackLocationFromAddressFound){
         AsyncTask<String, Void, Location> task = new AsyncTask<String, Void, Location>(){
             @Override

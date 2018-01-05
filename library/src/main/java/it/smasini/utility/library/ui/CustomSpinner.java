@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.PorterDuff;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
@@ -90,6 +91,31 @@ public class CustomSpinner extends Spinner {
             }
             adapter.addAll(items);
         }
+    }
+
+    public void setSpinnerArrowColor(int color){
+        getBackground().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+    }
+
+    public void setDropdownResource(int dropdownResource) {
+        adapter.setDropdownResource(dropdownResource);
+    }
+
+    public void setItemResource(int itemResource) {
+        adapter.setItemResource(itemResource);
+    }
+
+    @Override
+    public SpinnerBaseAdapter getAdapter() {
+        return adapter;
+    }
+
+    public SpinnerItem getSelectedSpinnerItem(){
+        SpinnerItem item = (SpinnerItem)getSelectedItem();
+        if(item!=null){
+            return  item;
+        }
+        return  null;
     }
 
     public String getSelectedValue(){
