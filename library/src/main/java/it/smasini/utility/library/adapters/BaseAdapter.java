@@ -613,6 +613,16 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         swapData(dataFilter, true);
     }
 
+    public void addOnTop(T data){
+        viewModels.add(0, data);
+        if(selectedPosition >= 0){
+            selectedPosition++;
+        }
+        if(mEmptyView!=null)
+            mEmptyView.setVisibility(getItemCount() == 0 ? View.VISIBLE : View.GONE);
+        notifyDataSetChanged();
+    }
+
     public void clearFilter(){
         filterData(null);
     }
