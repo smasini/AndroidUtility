@@ -2,14 +2,19 @@ package it.smasini.utility.library.adapters;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.SparseBooleanArray;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Interpolator;
@@ -19,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import it.smasini.utility.library.R;
+import it.smasini.utility.library.activities.BaseActivity;
 import it.smasini.utility.library.graphics.ColorUtility;
 
 /**
@@ -34,6 +40,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     private View mEmptyView;
     protected View rootViewForSnackbar;
     final private int layoutId;
+    private ContexMenuAction<T> contexMenuAction;
 
     protected int loadingTypeLayoutId = R.layout.base_adapter_loading_item;
 
@@ -46,6 +53,10 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected boolean isOnItemSelection = false;
     protected boolean isOnBind = false;
 
+
+    protected boolean contextMenuEnabled = false;
+    protected T modelForContextMenu;
+    protected int colorContextSelected;
 
     private OnClickHandler<T> mClickHandler;
     private EndlessRecyclerViewScrollListener endlessRecyclerViewScrollListener;
@@ -73,6 +84,7 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         this.swipedLeftColor = defaultColor;
         this.swipedRightTextColor = defaultColor;
         this.swipedLeftTextColor = defaultColor;
+        this.colorContextSelected = Color.GRAY;
     }
 
     public BaseAdapter(Context context, View emptyView, OnClickHandler<T> clickHandler, int layoutId){
@@ -420,6 +432,23 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         return count;
     }
 
+    public T getModelForContextMenu() {
+        return modelForContextMenu;
+    }
+
+    protected View.OnCreateContextMenuListener createContextMenu(final ViewHolder holder){
+        return new View.OnCreateContextMenuListener() {
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo) {
+                modelForContextMenu = viewModels.get(holder.index);
+                if(contexMenuAction!=null){
+                    contexMenuAction.createContextMenu(contextMenu, view, contextMenuInfo);
+                }
+                notifyItemChanged(holder.index);
+            }
+        };
+    }
+
     public void swapData(List<T> newList){
         swapData(newList, false);
     }
@@ -747,6 +776,33 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
         }
     }
 
+    public void enableContextMenu(Activity activity, RecyclerView recyclerView, ContexMenuAction<T> contexMenuAction){
+        //contextMenu.add(Menu.NONE, R.id.context_menu_delete, Menu.NONE, R.string.recyclerview_delete_text);//groupId, itemId, order, title
+        //contextMenu.add(0, R.id.context_menu_edit, 0, R.string.recyclerview_edit_text);
+        this.contexMenuAction = contexMenuAction;
+        activity.registerForContextMenu(recyclerView);
+        if(activity instanceof BaseActivity){
+            BaseActivity baseActivity = (BaseActivity) activity;
+            baseActivity.setContextCallback(new BaseActivity.ContextCallback() {
+                @Override
+                public void onContextClosed(Menu menu) {
+                    int pos = getPosition(modelForContextMenu);
+                    modelForContextMenu = null;
+                    notifyItemChanged(pos);
+                }
+
+                @Override
+                public boolean onContextItemSelected(MenuItem item) {
+                    if(BaseAdapter.this.contexMenuAction!=null){
+                       if(BaseAdapter.this.contexMenuAction.onActionMenuClick(modelForContextMenu, item.getItemId()))
+                           return true;
+                    }
+                    return false;
+                }
+            });
+        }
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener, View.OnLongClickListener{
         public int index;
         public ViewHolder(View view){
@@ -754,6 +810,9 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
             view.setOnClickListener(this);
             if(multipleSelectionEnabled){
                 view.setOnLongClickListener(this);
+            }
+            if(contextMenuEnabled){
+                view.setOnCreateContextMenuListener(createContextMenu(this));
             }
         }
 
@@ -822,6 +881,11 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
 
     public interface InfiniteScrollListener{
         void onLoadMore(int page, int totalItemsCount);
+    }
+
+    public interface ContexMenuAction<T>{
+        void createContextMenu(ContextMenu contextMenu, View view, ContextMenu.ContextMenuInfo contextMenuInfo);
+        boolean onActionMenuClick(T model, int id);
     }
 
 }

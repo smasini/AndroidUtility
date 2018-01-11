@@ -10,4 +10,5 @@
     <string name="recyclerview_delete_item_msg">Un elemento è stato eliminato</string>
     <string name="recyclerview_delete_item_cancel">Annulla</string>
     <string name="recyclerview_delete_text">Elimina</string>
+    <string name="recyclerview_edit_text">Modifica</string>
 </resources>

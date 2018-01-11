@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="context_menu_delete" type="id">context_menu_delete</item>
+    <item name="context_menu_edit" type="id">context_menu_edit</item>
+</resources>

@@ -15,7 +15,7 @@ import it.smasini.utility.library.R;
 /**
  * Created by smasini on 11/08/16.
  */
-public abstract class DrawerActivity extends AppCompatActivity {
+public abstract class DrawerActivity extends BaseActivity {
 
     protected DrawerLayout drawer;
     protected String tagFragmentDefault;
