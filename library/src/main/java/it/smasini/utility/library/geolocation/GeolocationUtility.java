@@ -1,10 +1,16 @@
 package it.smasini.utility.library.geolocation;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.os.AsyncTask;
+import android.provider.Settings;
+import android.text.TextUtils;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -29,6 +35,70 @@ public class GeolocationUtility {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @SuppressLint("DefaultLocale")
+    public static String getUrlForGetAddressFromLatLng(double latitude, double longitude){
+        return String.format("http://maps.googleapis.com/maps/api/geocode/json?latlng=%f,%f&sensor=true", latitude, longitude);
+    }
+
+    public static GeolocationInfo parseJSONObjectForAddress(JSONObject object){
+        GeolocationInfo gi = null;
+        String status = object.optString("status");
+        if(status.equalsIgnoreCase("ok")){
+            JSONArray results = object.optJSONArray("results");
+            if(results!=null) {
+                JSONObject zero = results.optJSONObject(0);
+                if(zero!=null) {
+                    JSONArray address_components = zero.optJSONArray("address_components");
+                    if (address_components != null) {
+                        for (int i = 0; i < address_components.length(); i++) {
+                            JSONObject zero2 = address_components.optJSONObject(i);
+                            if(zero2!=null){
+                                if(gi==null){
+                                    gi = new GeolocationInfo();
+                                }
+                                String long_name = zero2.optString("long_name");
+                                JSONArray mtypes = zero2.optJSONArray("types");
+                                String type = mtypes.optString(0);
+                                /*
+                            if (TextUtils.isEmpty(long_name) == false || !long_name.equals(null) || long_name.length() > 0 || long_name != "") {
+
+                            }
+                            */
+                                if((type!=null && !type.isEmpty()) && (long_name!= null && !long_name.isEmpty())){
+                                    if(type.equalsIgnoreCase("street_number")){
+                                        gi.setAddress1(long_name + " ");
+                                    }
+                                    else if(type.equalsIgnoreCase("route")){
+                                        gi.setAddress1(gi.getAddress1() + long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("sublocality")){
+                                        gi.setAddress2(long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("locality")){
+                                        gi.setCity(long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("administrative_area_level_2")){
+                                        gi.setCountry(long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("administrative_area_level_1")){
+                                        gi.setState(long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("country")){
+                                        gi.setCountry(long_name);
+                                    }
+                                    else if(type.equalsIgnoreCase("postal_code")){
+                                        gi.setPostalCode(long_name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return gi;
     }
 
     public static void startLocationAddress(String address, final Context context, final CallbackLocationFromAddressFound callbackLocationFromAddressFound){
