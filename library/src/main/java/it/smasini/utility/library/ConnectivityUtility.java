@@ -1,5 +1,6 @@
 package it.smasini.utility.library;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.provider.Settings;
  */
 public class ConnectivityUtility {
 
+    @SuppressLint("MissingPermission")
     public static boolean isWiFiConnected(Activity activity){
         ConnectivityManager connManager = (ConnectivityManager) activity.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
@@ -41,6 +43,7 @@ public class ConnectivityUtility {
         return true;
     }
 
+    @SuppressLint("MissingPermission")
     public static boolean isConnected(Context context){
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
