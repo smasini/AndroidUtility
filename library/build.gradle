@@ -44,7 +44,7 @@ publish {
     userOrg = 'smasini'
     groupId = 'it.smasini'
     artifactId = 'android-utility'
-    publishVersion = '1.5.162'
+    publishVersion = '1.6'
     website = 'https://github.com/smasini/AndroidUtility'
     repository = 'https://github.com/smasini/AndroidUtility.git'
     bintrayUser = 'smasini'
