@@ -213,8 +213,8 @@ public class TreeViewAdapter extends BaseAdapter<TreeItemViewModel> {
 
     private int getPaddingEnd(View view){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return view.getPaddingRight();
+            return view.getPaddingEnd();
         }
-        return view.getPaddingEnd();
+        return view.getPaddingRight();
     }
 }
