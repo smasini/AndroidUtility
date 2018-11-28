@@ -1,13 +1,12 @@
 package it.smasini.utility.library.notifications;
 
 import android.app.Activity;
-import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.support.compat.BuildConfig;
 import android.util.Log;
+import it.smasini.utility.library.BuildConfig;
 
 /**
  * Created by Simone on 24/01/17.
