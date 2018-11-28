@@ -4,16 +4,16 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
-import android.widget.ImageView;
 
 /**
  * Created by Simone Masini on 30/06/2016
  */
-public class ZoomableImageView extends ImageView
+public class ZoomableImageView extends AppCompatImageView
 {
     Matrix matrix = new Matrix();
 

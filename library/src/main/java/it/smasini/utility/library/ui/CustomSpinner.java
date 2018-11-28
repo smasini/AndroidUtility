@@ -1,17 +1,13 @@
 package it.smasini.utility.library.ui;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
-import android.os.Build;
+import android.support.v7.widget.AppCompatSpinner;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
-import android.widget.Spinner;
-
 import java.util.List;
-
 import it.smasini.utility.library.R;
 import it.smasini.utility.library.adapters.SpinnerBaseAdapter;
 import it.smasini.utility.library.adapters.SpinnerItem;
@@ -19,7 +15,7 @@ import it.smasini.utility.library.adapters.SpinnerItem;
 /**
  * Created by Simone Masini on 03/09/2016.
  */
-public class CustomSpinner extends Spinner {
+public class CustomSpinner extends AppCompatSpinner {
 
     private SpinnerBaseAdapter adapter;
 
@@ -45,12 +41,6 @@ public class CustomSpinner extends Spinner {
 
     public CustomSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode) {
         super(context, attrs, defStyleAttr, mode);
-        init(attrs);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public CustomSpinner(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes, int mode) {
-        super(context, attrs, defStyleAttr, defStyleRes, mode);
         init(attrs);
     }
 

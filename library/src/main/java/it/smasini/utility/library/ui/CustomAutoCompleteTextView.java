@@ -1,19 +1,20 @@
 package it.smasini.utility.library.ui;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.AutoCompleteTextView;
 import android.widget.ProgressBar;
 
 /**
  * Created by Simone Masini on 03/09/2016.
  */
-public class CustomAutoCompleteTextView extends AutoCompleteTextView {
+public class CustomAutoCompleteTextView extends AppCompatAutoCompleteTextView {
 
     private static final int MESSAGE_TEXT_CHANGED = 100;
     private static final int DEFAULT_AUTOCOMPLETE_DELAY = 750;
@@ -21,6 +22,7 @@ public class CustomAutoCompleteTextView extends AutoCompleteTextView {
     private int mAutoCompleteDelay = DEFAULT_AUTOCOMPLETE_DELAY;
     private ProgressBar mLoadingIndicator;
 
+    @SuppressLint("HandlerLeak")
     private final Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -38,11 +40,6 @@ public class CustomAutoCompleteTextView extends AutoCompleteTextView {
 
     public CustomAutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public CustomAutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
     }
 
     public void setLoadingIndicator(ProgressBar progressBar) {

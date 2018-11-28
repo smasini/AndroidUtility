@@ -1,35 +1,31 @@
 package it.smasini.utility.library.ui;
 
-import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.support.v7.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.View;
-import android.widget.EditText;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Locale;
 
 import it.smasini.utility.library.R;
 
 /**
  * Created by Simone on 19/09/16.
  */
-public class DatePicker extends EditText implements DatePickerDialog.OnDateSetListener {
+public class DatePicker extends AppCompatEditText implements DatePickerDialog.OnDateSetListener {
 
     private Date currentDate;
     private String dateFormat = "dd/MM/yyyy";
     private OnDateChangeListener listener;
     private boolean initOnStart = true;
     private boolean darkStyle;
-
 
     public DatePicker(Context context) {
         super(context);
@@ -45,13 +41,6 @@ public class DatePicker extends EditText implements DatePickerDialog.OnDateSetLi
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
-
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public DatePicker(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs);
-    }
-
 
     private void init(Context context, AttributeSet attrs){
         if(attrs!=null){
