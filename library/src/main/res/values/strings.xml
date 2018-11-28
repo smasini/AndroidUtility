@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Utility</string>
+    <string name="app_name" translatable="false">Utility</string>
     <string name="label_ok">OK</string>
     <string name="label_annulla">Cancel</string>
     <string name="label_progress_download_task">Downloading...</string>
@@ -15,7 +15,7 @@
     <string name="lorem_ipsum" translatable="false">Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur. Quis aute iure reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint obcaecat cupiditat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
     <string name="lorem_ipsum_small" translatable="false">Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua</string>
     <string name="lorem_ipsum_medium" translatable="false">Lorem ipsum dolor sit amet, consectetur adipisci elit, sed eiusmod tempor incidunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur.</string>
-    <string name="pulisci_data">Pulisci</string>
-    <string name="open_file_error_title">Impossibile aprire il file</string>
-    <string name="open_file_error_msg">"Non è presente nessuna applicazione in grado di aprire file di tipo: "</string>
+    <string name="pulisci_data">Clean</string>
+    <string name="open_file_error_title">Impossible open that file</string>
+    <string name="open_file_error_msg">"There is no application to open files with format: "</string>
 </resources>

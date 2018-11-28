@@ -11,4 +11,7 @@
     <string name="recyclerview_delete_item_cancel">Annulla</string>
     <string name="recyclerview_delete_text">Elimina</string>
     <string name="recyclerview_edit_text">Modifica</string>
+    <string name="pulisci_data">Pulisci</string>
+    <string name="open_file_error_title">Impossibile aprire il file</string>
+    <string name="open_file_error_msg">"Non è presente nessuna applicazione in grado di aprire file di tipo: "</string>
 </resources>
