@@ -1,9 +1,40 @@
 apply plugin: 'com.android.library'
-apply plugin: "guru.stefma.bintrayrelease"
+apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'com.jfrog.bintray'
+
+def groupProjectID = 'it.smasini'
+def artifactProjectID = 'android-utility'
+def publishVersionID = '1.6.2'
+
+bintray.user="smasini"
+bintray.key=""
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'smasini'
+
+    publishedGroupId = groupProjectID
+    libraryName = 'Android Utility'
+    artifact = artifactProjectID
+
+    libraryDescription = 'Generic Utility for and android application'
+
+    siteUrl = 'https://github.com/smasini/AndroidUtility'
+    gitUrl = 'https://github.com/smasini/AndroidUtility.git'
+
+    libraryVersion = publishVersionID
+
+    developerId = 'smasini'
+    developerName = 'Simone Masini'
+    developerEmail = 'simone.masini92@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
 
 android {
     compileSdkVersion 28
-    //buildToolsVersion "28.0.3"
 
     defaultConfig {
         minSdkVersion 14
@@ -30,21 +61,16 @@ dependencies {
     implementation 'com.android.support:design:28.0.0'
 }
 
-version = "1.6"
-group = "it.smasini"
-androidArtifact {
-    artifactId = "android-utility"
-}
-publish {
-    userOrg = 'smasini'
-    bintrayKey = ''
-    repoName = 'maven'
-    desc = 'Generic Utility for and android application'
-    repository = 'https://github.com/smasini/AndroidUtility.git'
-    website = 'https://github.com/smasini/AndroidUtility'
-    dryRun="false"
-}
 
+apply from: 'bintray.gradle'
 
+//vecchio comando
+//./gradlew clean build bintrayUpload -PbintrayUser=smasini -PbintrayKey=b668f605c7d5bf41d6f52f842e29b42b42773a73 -PdryRun=false
+//nuovo comando
+//./gradlew clean build install bintrayUpload
 
-
+//NB: siccome mi fa bestemmiare il nuovo processo è questo:
+//1. Dare questo comando
+//./gradlew clean build install
+//In questo path vengono messi tutti i file: /Users/Simone/.m2/repository/it/smasini/android-utility
+//caricarli manualmente su bintray, creando la versione manualmente
