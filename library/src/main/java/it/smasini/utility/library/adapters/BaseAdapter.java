@@ -45,14 +45,13 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     protected int loadingTypeLayoutId = R.layout.base_adapter_loading_item;
 
     protected List<T> viewModels = new ArrayList<>();
-    private List<T> originalViewModels;
+    protected List<T> originalViewModels;
 
     private boolean multipleSelectionEnabled, infiniteScrollEnable, infiniteScrollEnded;
     protected boolean loadingMoreRecords = false;
     protected boolean animationScrollEnabled = false;
     protected boolean isOnItemSelection = false;
     protected boolean isOnBind = false;
-
 
     protected boolean contextMenuEnabled = false;
     protected T modelForContextMenu;
@@ -454,8 +453,12 @@ public abstract class BaseAdapter<T> extends RecyclerView.Adapter<BaseAdapter<T>
     }
 
     public void swapData(List<T> newList, boolean saveOriginal){
+        swapData(newList, saveOriginal, false);
+    }
+
+    public void swapData(List<T> newList, boolean saveOriginal, boolean overrideOriginal){
         if(saveOriginal){
-            if(originalViewModels==null) {
+            if(originalViewModels==null || overrideOriginal) {
                 originalViewModels = new ArrayList<>(viewModels);
             }
         }

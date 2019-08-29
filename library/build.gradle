@@ -4,7 +4,7 @@ apply plugin: 'com.jfrog.bintray'
 
 def groupProjectID = 'it.smasini'
 def artifactProjectID = 'android-utility'
-def publishVersionID = '1.6.2'
+def publishVersionID = '1.6.3'
 
 bintray.user="smasini"
 bintray.key=""
